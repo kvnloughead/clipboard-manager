@@ -6,6 +6,7 @@ const yargs = _yargs(hideBin(process.argv));
 
 import set from '../commands/set.js';
 import get from '../commands/get.js';
+import remove from '../commands/remove.js';
 
 yargs
   .command(
@@ -29,6 +30,16 @@ yargs
       });
     },
     get,
+  )
+  .command(
+    ['remove <key>', 'rm', 'delete', 'del', 'd'],
+    'deletes the key:value pair',
+    (yargs) => {
+      yargs.positional('key', {
+        describe: 'key to remove from data',
+      });
+    },
+    remove,
   )
   .option('verbose', {
     alias: 'v',
