@@ -15,11 +15,12 @@ const config = configPath ? JSON.parse(fs.readFileSync(configPath)) : {};
 import set from '../commands/set.js';
 import get from '../commands/get.js';
 import remove from '../commands/remove.js';
+import { openFile } from '../utils/helpers.js';
 
 yargs
   .env('CB')
   .default({
-    clipsFile: `/home/${process.env.USER}/.config/cb/clips.json`,
+    clipsPath: `/home/${process.env.USER}/.config/cb/clips.json`,
     editor: process.env.EDITOR,
     configPath,
   })
@@ -32,7 +33,9 @@ yargs
         default: 0,
       });
     },
-    set,
+    (argv) => {
+      set({ ...argv, file: argv.clipsPath });
+    },
   )
   .command(
     ['get [key]', 'g'],
@@ -55,16 +58,20 @@ yargs
     },
     remove,
   )
-  // .command(
-  //   ['config [option]', 'cfg'],
-  //   'sets a configuration option, or opens configuration file',
-  //   (yargs) => {
-  //     yargs.positional('option', {
-  //       describe: 'the option to configure',
-  //     });
-  //   },
-  //   config,
-  // )
+  .command(
+    ['config [option]', 'cfg'],
+    'sets a configuration option, or opens configuration file if no option is provided',
+    (yargs) => {
+      yargs.positional('option', {
+        describe: 'the option to configure',
+      });
+    },
+    ({ configPath, option, ...rest }) => {
+      option
+        ? set({ ...rest, file: configPath, key: option })
+        : openFile(rest.editor, configPath);
+    },
+  )
   .option('verbose', {
     alias: 'v',
     type: 'boolean',

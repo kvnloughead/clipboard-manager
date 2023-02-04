@@ -1,12 +1,11 @@
 import fs from 'fs';
-import { spawn } from 'child_process';
 import clipboard from 'clipboardy';
 
-// const editor = 'code';
+import { openFile } from '../utils/helpers.js';
 
 function get({ key, clipsFile, editor }) {
   if (key === null) {
-    spawn(editor, [clipsFile], { stdio: 'inherit' });
+    openFile(editor, clipsFile);
   } else {
     const data = JSON.parse(fs.readFileSync(clipsFile));
     clipboard.writeSync(data[key]);
