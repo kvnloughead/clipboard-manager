@@ -4,19 +4,31 @@ import _yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 const yargs = _yargs(hideBin(process.argv));
 
-import save from '../commands/save.js';
+import set from '../commands/set.js';
+import get from '../commands/get.js';
 
 yargs
   .command(
-    ['save [key]', 's'],
-    'save contents of clipboard with "key" as its hash',
+    ['set [key]', 's'],
+    'assigns clipboard contents to data[key]',
     (yargs) => {
       yargs.positional('key', {
         describe: 'key to associate with clipboard contents',
         default: 0,
       });
     },
-    save,
+    set,
+  )
+  .command(
+    ['get [key]', 'g'],
+    'loads the value cb[key] to the clipboard',
+    (yargs) => {
+      yargs.positional('key', {
+        describe: 'key to access from data file',
+        default: null,
+      });
+    },
+    get,
   )
   .option('verbose', {
     alias: 'v',
