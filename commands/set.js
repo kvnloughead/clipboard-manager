@@ -1,12 +1,10 @@
 import fs from 'fs';
 import clipboard from 'clipboardy';
 
-const dataFile = '/home/kevin/Dropbox/cb/clips.json';
-
-function set({ key }) {
-  const data = JSON.parse(fs.readFileSync(dataFile));
+function set({ configFile, key, clipsFile }) {
+  const data = JSON.parse(fs.readFileSync(clipsFile));
   data[key] = clipboard.readSync();
-  fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
+  fs.writeFileSync(clipsFile, JSON.stringify(data, null, 2));
 }
 
 export default set;

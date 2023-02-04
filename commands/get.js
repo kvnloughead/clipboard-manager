@@ -2,14 +2,13 @@ import fs from 'fs';
 import { spawn } from 'child_process';
 import clipboard from 'clipboardy';
 
-const dataFile = '/home/kevin/Dropbox/cb/clips.json';
-const EDITOR = 'code';
+// const editor = 'code';
 
-function get({ key }) {
+function get({ key, clipsFile, editor }) {
   if (key === null) {
-    spawn(EDITOR, [dataFile], { stdio: 'inherit' });
+    spawn(editor, [clipsFile], { stdio: 'inherit' });
   } else {
-    const data = JSON.parse(fs.readFileSync(dataFile));
+    const data = JSON.parse(fs.readFileSync(clipsFile));
     clipboard.writeSync(data[key]);
   }
 }
