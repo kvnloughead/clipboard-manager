@@ -1,9 +1,8 @@
 import fs from 'fs';
-import clipboard from 'clipboardy';
 
-function set({ file, key }) {
+function set({ file, key, content }) {
   const data = JSON.parse(fs.readFileSync(file));
-  data[key] = clipboard.readSync();
+  data[key] = content;
   fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
 

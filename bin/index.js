@@ -3,6 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import _yargs from 'yargs';
+import clipboard from 'clipboardy';
 import { hideBin } from 'yargs/helpers';
 import { findUp } from 'find-up';
 import * as dotenv from 'dotenv';
@@ -21,6 +22,7 @@ yargs
   .env('CB')
   .default({
     clipsPath: `/home/${process.env.USER}/.config/cb/clips.json`,
+    content: clipboard.readSync(),
     editor: process.env.EDITOR,
     configPath,
   })
