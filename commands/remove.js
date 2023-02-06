@@ -8,7 +8,7 @@ function remove({ key }) {
   delete data[key];
   fs.writeFileSync(clipsPath, JSON.stringify(data, null, 2));
   console.log(
-    `\nDeleted key value pair:\n  key: "${key}"\t  value: "${val}"\n`,
+    `\nDeleted key value pair:\n  key: "${key.trim()}"\n  value: "${val.trim()}"\n`,
   );
 }
 

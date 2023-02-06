@@ -22,7 +22,6 @@ yargs
   .env('CB')
   .default({
     clipsPath: `/home/${process.env.USER}/.config/cb/clips.json`,
-    content: clipboard.readSync(),
     editor: process.env.EDITOR,
     configPath,
   })
@@ -36,7 +35,7 @@ yargs
       });
     },
     (argv) => {
-      set({ ...argv, file: argv.clipsPath });
+      set({ ...argv, file: argv.clipsPath, content: clipboard.readSync() });
     },
   )
   .command(
@@ -62,7 +61,7 @@ yargs
   )
   .command(
     ['config [option]', 'cfg'],
-    'sets a configuration option, or opens configuration file if no option is provided',
+    'Sets a configuration option, or opens configuration file if no option is provided',
     (yargs) => {
       yargs.positional('option', {
         describe: 'the option to configure',
