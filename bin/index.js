@@ -17,7 +17,7 @@ import set from '../commands/set.js';
 import get from '../commands/get.js';
 import remove from '../commands/remove.js';
 import list from '../commands/list.js';
-import { openFileInEditor } from '../utils/helpers.js';
+import { openFileInEditor, parseJSON } from '../utils/helpers.js';
 
 yargs
   .env('CB')
@@ -90,4 +90,14 @@ yargs
   .showHelpOnFail(true)
   .help('h')
   .alias('h', 'help')
+  .completion('completion', function (current, argv, completionFilter, done) {
+    if (argv._.includes('g') || argv._.includes('get')) {
+      completionFilter((err, defaultCompletions) => {
+        const clipKeys = Object.keys(parseJSON(argv.clipsPath));
+        done(clipKeys);
+      });
+    } else {
+      completionFilter();
+    }
+  })
   .config(config).argv;
