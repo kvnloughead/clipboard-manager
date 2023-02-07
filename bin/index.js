@@ -16,13 +16,15 @@ const config = configPath ? JSON.parse(fs.readFileSync(configPath)) : {};
 import set from '../commands/set.js';
 import get from '../commands/get.js';
 import remove from '../commands/remove.js';
-import { openFile } from '../utils/helpers.js';
+import list from '../commands/list.js';
+import { openFileInEditor } from '../utils/helpers.js';
 
 yargs
   .env('CB')
   .default({
     clipsPath: `/home/${process.env.USER}/.config/cb/clips.json`,
     editor: process.env.EDITOR,
+    pager: `less`,
     configPath,
   })
   .command(
@@ -70,8 +72,14 @@ yargs
     ({ configPath, option, ...rest }) => {
       option
         ? set({ ...rest, file: configPath, key: option })
-        : openFile(rest.editor, configPath);
+        : openFileInEditor(rest.editor, configPath);
     },
+  )
+  .command(
+    ['list', 'l'],
+    'Outputs list of current clips to the terminal.',
+    (yargs) => {},
+    list,
   )
   .option('verbose', {
     alias: 'v',

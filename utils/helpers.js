@@ -1,5 +1,5 @@
 import { spawn } from 'child_process';
 
-export function openFile(editor, file) {
+export function openFileInEditor(editor, file) {
   spawn(editor, [file], { stdio: 'inherit' });
 }
