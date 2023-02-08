@@ -78,7 +78,12 @@ yargs
   .command(
     ['list', 'l'],
     'Outputs list of current clips to the terminal.',
-    (yargs) => {},
+    (yargs) => {
+      yargs.option('pretty', {
+        describe: 'makes output look nicer, according to some',
+        alias: 'p',
+      });
+    },
     list,
   )
   .option('verbose', {

@@ -1,18 +1,34 @@
 import fs from 'fs';
 
-function list({ clipsPath }) {
-  const terminalWidth = process.stdout.columns;
+import { printTableFromObject, truncateString } from '../utils/helpers.js';
+
+/**
+ * Lists all key/value pairs in clips file. Can be ugly or less ugly.
+ * The ugly version supports pipes better.
+ *
+ * @param {path|string} clipsPath - path to the clips file
+ * @param {string} pretty - option for kind of pretty printing -p|--pretty
+ *
+ */
+function list({ clipsPath, pretty }) {
   const data = JSON.parse(fs.readFileSync(clipsPath));
-  const columns = Object.fromEntries(
-    Object.entries(data).map(([k, v], i) => {
-      let newVal = v.trim();
-      if (newVal.length > terminalWidth / 2) {
-        newVal = newVal.substring(0, terminalWidth / 2) + '...';
-      }
-      return [k, newVal];
-    }),
-  );
-  console.table(columns);
+  const maxKeyLength = Math.max(...Object.keys(data).map((k) => k.length));
+  const { columns } = process.stdout; // when piping, this will be undefined
+  if (pretty) {
+    printTableFromObject(data, columns, { key: maxKeyLength });
+  } else {
+    let res = `\n`;
+    Object.entries(data).forEach(([k, v]) => {
+      const key = k.padStart(maxKeyLength, ' ');
+      let val = v.replace(/\s{2,}/g, '\n').trim();
+      // TODO - figure out how to determine terminal width when piping
+      val = columns
+        ? truncateString(val, columns / 2, { ellipsis: false })
+        : val;
+      res += `${key}\t${val}\n`;
+    });
+    console.log(res + `\n`);
+  }
 }
 
 export default list;
