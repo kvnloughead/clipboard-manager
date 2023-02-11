@@ -2,11 +2,14 @@ import clipboard from 'clipboardy';
 
 import { parseJSON } from '../utils/helpers.js';
 
-function get({ key, clipsPath }) {
-  const data = parseJSON(clipsPath);
+function get({ key, file, config }) {
+  const data = parseJSON(file);
+  const fname = config ? 'config' : 'clips';
   if (!data[key]) {
     console.error(
-      `\n${key}: no such key. \nRun \`cb list\` to see available keys.\n`,
+      `\n${key}: no such key in ${fname} file. \nRun \`cb list ${
+        config ? '-c' : ''
+      }\` to see available keys.\n`,
     );
   } else {
     clipboard.writeSync(data[key]);

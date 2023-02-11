@@ -10,8 +10,8 @@ import { printTableFromObject, truncateString } from '../utils/helpers.js';
  * @param {string} pretty - option for kind of pretty printing -p|--pretty
  *
  */
-function list({ clipsPath, pretty }) {
-  const data = JSON.parse(fs.readFileSync(clipsPath));
+function list({ file, pretty }) {
+  const data = JSON.parse(fs.readFileSync(file));
   const maxKeyLength = Math.max(...Object.keys(data).map((k) => k.length));
   const { columns } = process.stdout; // when piping, this will be undefined
   if (pretty) {

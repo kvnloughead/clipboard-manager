@@ -1,14 +1,14 @@
 import fs from 'fs';
 
-const clipsPath = '/home/kevin/Dropbox/cb/clips.json';
-
-function remove({ key }) {
-  const data = JSON.parse(fs.readFileSync(clipsPath));
+function remove({ key, file }) {
+  const data = JSON.parse(fs.readFileSync(file));
   const val = data[key];
   delete data[key];
-  fs.writeFileSync(clipsPath, JSON.stringify(data, null, 2));
+  fs.writeFileSync(file, JSON.stringify(data, null, 2));
   console.log(
-    `\nDeleted key value pair:\n  key: "${key.trim()}"\n  value: "${val.trim()}"\n`,
+    `\nDeleted key value pair:\n  key: "${String(
+      key,
+    ).trim()}"\n  value: "${val.trim()}"\n`,
   );
 }
 

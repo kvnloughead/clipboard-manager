@@ -13,20 +13,37 @@ dotenv.config();
 const configPath = await findUp([path.normalize('.config/cb/settings.json')]);
 const config = configPath ? JSON.parse(fs.readFileSync(configPath)) : {};
 
+import { setFilePath } from '../middleware/index.js';
+
 import set from '../commands/set.js';
 import get from '../commands/get.js';
 import remove from '../commands/remove.js';
 import list from '../commands/list.js';
+import open from '../commands/open.js';
 import { openFileInEditor, parseJSON } from '../utils/helpers.js';
 
 yargs
   .env('CB')
+  .options({
+    e: {
+      alias: 'editor',
+      default: process.env.EDITOR || 'nano',
+      describe: 'Editor to use to open config or data files',
+      type: 'string',
+    },
+    c: {
+      alias: ['cfg', 'config'],
+      default: false,
+      describe: 'Run commands on config file instead of clips.',
+      type: 'boolean',
+    },
+  })
+  .requiresArg('e')
   .default({
     clipsPath: `/home/${process.env.USER}/.config/cb/clips.json`,
-    editor: process.env.EDITOR,
-    pager: `less`,
     configPath,
   })
+  .middleware(setFilePath)
   .command(
     ['set [key]', 's'],
     'assigns clipboard contents to data[key]',
@@ -37,7 +54,7 @@ yargs
       });
     },
     (argv) => {
-      set({ ...argv, file: argv.clipsPath, content: clipboard.readSync() });
+      set({ ...argv, content: clipboard.readSync() });
     },
   )
   .command(
@@ -86,6 +103,7 @@ yargs
     },
     list,
   )
+  .command(['open', 'o'], 'Opens clips file in editor.', () => {}, open)
   .option('verbose', {
     alias: 'v',
     type: 'boolean',
