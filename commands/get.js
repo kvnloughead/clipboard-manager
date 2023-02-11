@@ -1,13 +1,14 @@
 import clipboard from 'clipboardy';
 
-import { openFileInEditor, parseJSON } from '../utils/helpers.js';
+import { parseJSON } from '../utils/helpers.js';
 
-function get({ key, clipsPath, editor, ...rest }) {
-  console.log(rest);
-  if (key === null) {
-    openFileInEditor(editor, clipsPath);
+function get({ key, clipsPath }) {
+  const data = parseJSON(clipsPath);
+  if (!data[key]) {
+    console.error(
+      `\n${key}: no such key. \nRun \`cb list\` to see available keys.\n`,
+    );
   } else {
-    const data = parseJSON(clipsPath);
     clipboard.writeSync(data[key]);
   }
 }

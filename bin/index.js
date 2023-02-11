@@ -46,7 +46,7 @@ yargs
     (yargs) => {
       yargs.positional('key', {
         describe: 'key to access from data file',
-        default: null,
+        default: 0,
       });
     },
     get,
