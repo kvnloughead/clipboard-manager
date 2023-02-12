@@ -38,7 +38,7 @@ export function printTableFromObject(obj, width, padding) {
     Object.entries(obj).map(([k, v]) => {
       const key = padding.key ? k.padStart(padding.key, ' ') : k;
       let newVal = v.trim();
-      newVal = truncateString(newVal, width / 2);
+      newVal = truncateString(newVal, width / 2, {});
       newVal = padding.val ? newVal.padStart(padding.val, ' ') : newVal;
       return [key, newVal];
     }),

@@ -5,9 +5,9 @@ import { printTableFromObject, truncateString } from '../utils/helpers.js';
 /**
  * Lists all key/value pairs in clips file. Can be ugly or less ugly.
  * The ugly version supports pipes better.
- *
- * @param {path|string} clipsPath - path to the clips file
- * @param {string} pretty - option for kind of pretty printing -p|--pretty
+ * @param {argv} argv - command line arguments
+ * @param {path|string} argv.file - path to the file
+ * @param {string} argv.pretty - option for kind of pretty printing -p|--pretty
  *
  */
 function list({ file, pretty }) {
