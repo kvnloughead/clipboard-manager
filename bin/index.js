@@ -69,7 +69,7 @@ yargs
     get,
   )
   .command(
-    ['remove <key>', 'rm', 'delcomete', 'del', 'd'],
+    ['remove <key>', 'rm <key>', 'r <key>', 'del <key>', 'd <key>'],
     'deletes the key:value pair',
     (yargs) => {
       yargs.positional('key', {
@@ -113,14 +113,28 @@ yargs
   .showHelpOnFail(true)
   .help('h')
   .alias('h', 'help')
-  .completion('completion', function (current, argv, completionFilter, done) {
-    if (argv._.includes('g') || argv._.includes('get')) {
-      completionFilter((err, defaultCompletions) => {
+  .completion('completion', function (_current, argv, completionFilter, done) {
+    if (
+      argv._.includes('g') ||
+      argv._.includes('get') ||
+      argv._.includes('rm') ||
+      argv._.includes('remove') ||
+      argv._.includes('d') ||
+      argv._.includes('del') ||
+      argv._.includes('r')
+    ) {
+      completionFilter((_err, _defaultCompletions) => {
         const clipKeys = Object.keys(parseJSON(argv.clipsPath));
         done(clipKeys);
+      });
+    } else if (argv._.includes('c') || argv._.includes('cfg')) {
+      completionFilter((_err, _defaultCompletions) => {
+        const configKeys = Object.keys(parseJSON(argv.configPath));
+        done(configKeys);
       });
     } else {
       completionFilter();
     }
   })
+
   .config(config).argv;
