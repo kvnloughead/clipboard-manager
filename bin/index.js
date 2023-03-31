@@ -69,7 +69,7 @@ yargs
     get,
   )
   .command(
-    ['remove <key>', 'rm', 'delcomete', 'del', 'd'],
+    ['remove <key>', 'rm <key>', 'r <key>', 'del <key>', 'd <key>'],
     'deletes the key:value pair',
     (yargs) => {
       yargs.positional('key', {
@@ -113,14 +113,24 @@ yargs
   .showHelpOnFail(true)
   .help('h')
   .alias('h', 'help')
-  .completion('completion', function (current, argv, completionFilter, done) {
-    if (argv._.includes('g') || argv._.includes('get')) {
-      completionFilter((err, defaultCompletions) => {
+  .completion('completion', function (_current, argv, completionFilter, done) {
+    if (
+      ['g', 'get', 'rm', 'remove', 'd', 'del', 'r'].some((val) =>
+        argv._.includes(val),
+      )
+    ) {
+      completionFilter((_err, _defaultCompletions) => {
         const clipKeys = Object.keys(parseJSON(argv.clipsPath));
         done(clipKeys);
+      });
+    } else if (argv._.includes('c') || argv._.includes('cfg')) {
+      completionFilter((_err, _defaultCompletions) => {
+        const configKeys = Object.keys(parseJSON(argv.configPath));
+        done(configKeys);
       });
     } else {
       completionFilter();
     }
   })
+
   .config(config).argv;
