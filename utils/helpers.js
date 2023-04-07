@@ -1,5 +1,9 @@
 import fs from 'fs';
+import fsPromises from 'fs.promises';
+import path from 'path';
 import { spawn } from 'child_process';
+
+const { open, mkdir } = fsPromises;
 
 export function openFileInEditor(editor, file) {
   spawn(editor, [file], { stdio: 'inherit' });
@@ -44,4 +48,28 @@ export function printTableFromObject(obj, width, padding) {
     }),
   );
   console.table(columns);
+}
+
+/**
+ * Writes to a file, creating it if necessary.
+ *
+ * @param {string | path} file
+ * @param {string} contents
+ * @param {object} options
+ * @param {boolean} options.recursive - if true, create necessary directories
+ */
+export async function createAndWriteToFile(file, contents, options = {}) {
+  const { recursive = false } = options;
+
+  try {
+    if (recursive) {
+      await fsPromises.mkdir(path.dirname(file), { recursive: true });
+    }
+    await fsPromises.writeFile(file, contents);
+  } catch (error) {
+    console.error(
+      `Failed to create and write to file ${file}: ${error.message}`,
+    );
+    throw error;
+  }
 }
