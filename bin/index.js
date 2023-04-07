@@ -1,17 +1,11 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
-import path from 'path';
 import _yargs from 'yargs';
 import clipboard from 'clipboardy';
 import { hideBin } from 'yargs/helpers';
-import { findUp } from 'find-up';
 import * as dotenv from 'dotenv';
 const yargs = _yargs(hideBin(process.argv));
 dotenv.config();
-
-const configPath = await findUp([path.normalize('.config/cb/settings.json')]);
-const config = configPath ? JSON.parse(fs.readFileSync(configPath)) : {};
 
 import { setFilePath } from '../middleware/index.js';
 
@@ -21,6 +15,15 @@ import remove from '../commands/remove.js';
 import list from '../commands/list.js';
 import open from '../commands/open.js';
 import { openFileInEditor, parseJSON } from '../utils/helpers.js';
+
+function parseConfig() {
+  const defaults = parseJSON(
+    `/home/${process.env.USER}/.config/cb/defaults.json`,
+  );
+  const configPath = defaults.configPath;
+  return parseJSON(configPath);
+}
+const config = parseConfig();
 
 yargs
   .env('CB')
@@ -41,7 +44,7 @@ yargs
   .requiresArg('e')
   .default({
     clipsPath: `/home/${process.env.USER}/.config/cb/clips.json`,
-    configPath,
+    configPath: `/home/${process.env.USER}/.config/cb/settings.json`,
   })
   .middleware(setFilePath)
   .command(
