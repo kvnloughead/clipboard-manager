@@ -2,8 +2,7 @@ import fs from 'fs';
 import fsPromises from 'fs.promises';
 import path from 'path';
 import { spawn } from 'child_process';
-
-const { open, mkdir } = fsPromises;
+import prompt from 'prompt';
 
 export function openFileInEditor(editor, file) {
   spawn(editor, [file], { stdio: 'inherit' });
@@ -11,6 +10,21 @@ export function openFileInEditor(editor, file) {
 
 export function parseJSON(file) {
   return JSON.parse(fs.readFileSync(file));
+}
+
+function parseYes(str) {
+  return ['yes', 'y'].includes(str.toLowerCase());
+}
+
+export function promptForConfirmation(userPrompt, onExit, callback) {
+  prompt.start();
+  prompt.get([{ name: 'confirmation', message: userPrompt }], (err, result) => {
+    if (parseYes(result.confirmation)) {
+      callback();
+    } else {
+      console.log(onExit);
+    }
+  });
 }
 
 /**
@@ -72,4 +86,16 @@ export async function createAndWriteToFile(file, contents, options = {}) {
     );
     throw error;
   }
+}
+
+// Returns an array of all files in dirpath.
+export function ls(dirpath) {
+  return fs
+    .readdirSync(dirpath, { withFileTypes: true })
+    .filter((item) => !item.isDirectory())
+    .map((item) => item.name);
+}
+
+export function listImages(dirpath) {
+  return ls(dirpath).map((fname) => path.parse(fname).name);
 }

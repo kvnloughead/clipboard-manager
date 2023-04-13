@@ -40,6 +40,19 @@ yargs
       describe: 'Run commands on config file instead of clips.',
       type: 'boolean',
     },
+    f: {
+      alias: 'force',
+      default: false,
+      describe: 'Force action',
+      type: 'boolean',
+    },
+    i: {
+      alias: ['img'],
+      default: false,
+      describe:
+        'Indicates that the clipboard contains an image, not text. Not necessary when setting an image.',
+      type: 'boolean',
+    },
   })
   .requiresArg('e')
   .default({
