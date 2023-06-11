@@ -53,6 +53,12 @@ yargs
         'Indicates that the clipboard contains an image, not text. Not necessary when setting an image.',
       type: 'boolean',
     },
+    v: {
+      alias: ['verbose'],
+      default: false,
+      describe: 'run with verbose logging',
+      type: 'boolean',
+    },
   })
   .requiresArg('e')
   .default({
@@ -120,11 +126,6 @@ yargs
     list,
   )
   .command(['open', 'o'], 'Opens clips file in editor.', () => {}, open)
-  .option('verbose', {
-    alias: 'v',
-    type: 'boolean',
-    description: 'run with verbose logging',
-  })
   .demandCommand()
   .showHelpOnFail(true)
   .help('h')

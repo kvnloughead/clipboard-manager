@@ -7,7 +7,7 @@ import { parseJSON } from '../utils/helpers.js';
 import { ERRORS } from '../utils/errors.js';
 
 function get(args) {
-  const { file, images, key, config } = args;
+  const { file, imagesPath, key, config } = args;
 
   if (!args.img) {
     const data = parseJSON(file);
@@ -18,7 +18,7 @@ function get(args) {
       clipboard.writeSync(data[key]);
     }
   } else {
-    const file = path.join(images, key.toString() + '.png');
+    const file = path.join(imagesPath, key.toString() + '.png');
     if (fs.existsSync(file)) {
       // TODO - figure out why oh why this kludge is necessary. I can either
       // get the process to exit, or get it to work. Both at the same time

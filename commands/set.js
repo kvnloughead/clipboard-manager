@@ -5,10 +5,10 @@ import path from 'path';
 import { listImages, promptForConfirmation } from '../utils/helpers.js';
 
 function setClip(args) {
-  const { file, images, key, content } = args;
+  const { file, imagesPath, key, content } = args;
   exec(
     `xclip -selection clipboard -t image/png -o > ${path.join(
-      images,
+      imagesPath,
       key.toString() + '.png',
     )}`,
     (error, stdout, stderr) => {
@@ -26,9 +26,9 @@ function setClip(args) {
 }
 
 function set(args) {
-  const { file, key, force, images, content } = args;
+  const { file, key, force, imagesPath } = args;
   const data = args.img
-    ? listImages(images)
+    ? listImages(imagesPath)
     : JSON.parse(fs.readFileSync(file));
   if (force || (!args.img && !data[key]) || (args.img && !data.includes(key))) {
     setClip(args);
