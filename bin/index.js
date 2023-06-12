@@ -15,6 +15,7 @@ import remove from '../commands/remove.js';
 import list from '../commands/list.js';
 import open from '../commands/open.js';
 import { openFileInEditor, parseJSON } from '../utils/helpers.js';
+import { options } from '../help/index.js';
 
 function parseConfig() {
   const defaults = parseJSON(
@@ -27,6 +28,8 @@ const config = parseConfig();
 
 yargs
   .env('CB')
+  .option('verbose', options.verbose.details('main'))
+  .option('img', options.img.details('main'))
   .options({
     e: {
       alias: 'editor',
@@ -46,19 +49,6 @@ yargs
       describe: 'Force action',
       type: 'boolean',
     },
-    i: {
-      alias: ['img'],
-      default: false,
-      describe:
-        'Indicates that the clipboard contains an image, not text. Not necessary when setting an image.',
-      type: 'boolean',
-    },
-    v: {
-      alias: ['verbose'],
-      default: false,
-      describe: 'run with verbose logging',
-      type: 'boolean',
-    },
   })
   .requiresArg('e')
   .default({
@@ -74,6 +64,7 @@ yargs
         describe: 'key to associate with clipboard contents',
         default: 0,
       });
+      yargs.option('img', options.img.details('set'));
     },
     (argv) => {
       set({ ...argv, content: clipboard.readSync() });
@@ -87,6 +78,7 @@ yargs
         describe: 'key to access from data file',
         default: 0,
       });
+      yargs.option('img', options.img.details('get'));
     },
     get,
   )
@@ -118,14 +110,23 @@ yargs
     ['list', 'l'],
     'Outputs list of current clips to the terminal.',
     (yargs) => {
+      yargs.option('verbose', options.verbose.details('list'));
+      yargs.option('img', options.img.details('list'));
       yargs.option('pretty', {
-        describe: 'makes output look nicer, according to some',
+        description: 'Makes output look nicer, arguably.',
         alias: 'p',
       });
     },
     list,
   )
-  .command(['open', 'o'], 'Opens clips file in editor.', () => {}, open)
+  .command(
+    ['open', 'o'],
+    'Opens clips file in editor.',
+    () => {
+      yargs.option('img', options.img.details('open'));
+    },
+    open,
+  )
   .demandCommand()
   .showHelpOnFail(true)
   .help('h')
