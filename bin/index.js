@@ -107,9 +107,14 @@ yargs
     },
   )
   .command(
-    ['list', 'l'],
+    ['list [pattern]', 'l'],
     'Outputs list of current clips to the terminal.',
     (yargs) => {
+      yargs.positional('pattern', {
+        describe: 'pattern to match',
+        default: '',
+        type: 'string',
+      });
       yargs.option('verbose', options.verbose.details('list'));
       yargs.option('img', options.img.details('list'));
       yargs.option('pretty', {

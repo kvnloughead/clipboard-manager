@@ -16,6 +16,12 @@ function parseYes(str) {
   return ['yes', 'y'].includes(str.toLowerCase());
 }
 
+export function filterObj(obj, callback) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([k, v]) => callback(k, v)),
+  );
+}
+
 export function promptForConfirmation(userPrompt, onExit, callback) {
   prompt.start();
   prompt.get([{ name: 'confirmation', message: userPrompt }], (err, result) => {
@@ -88,14 +94,15 @@ export async function createAndWriteToFile(file, contents, options = {}) {
   }
 }
 
-// Returns an array of all files in dirpath.
-export function ls(dirpath) {
+// Returns an array of files that match pattern in dirpath
+export function ls(dirpath, pattern = '') {
   return fs
     .readdirSync(dirpath, { withFileTypes: true })
     .filter((item) => !item.isDirectory())
+    .filter((item) => item.name.match(pattern))
     .map((item) => item.name);
 }
 
-export function listImages(dirpath) {
-  return ls(dirpath).map((fname) => path.parse(fname).name);
+export function listImages(dirpath, pattern = '') {
+  return ls(dirpath, pattern).map((fname) => path.parse(fname).name);
 }
