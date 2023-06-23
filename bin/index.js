@@ -138,7 +138,7 @@ yargs
   .alias('h', 'help')
   .completion('completion', function (_current, argv, completionFilter, done) {
     if (
-      ['g', 'get', 'rm', 'remove', 'd', 'del', 'r'].some((val) =>
+      ['g', 'get', 's', 'set', 'rm', 'remove', 'd', 'del', 'r'].some((val) =>
         argv._.includes(val),
       )
     ) {
