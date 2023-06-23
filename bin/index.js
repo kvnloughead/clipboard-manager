@@ -14,7 +14,7 @@ import get from '../commands/get.js';
 import remove from '../commands/remove.js';
 import list from '../commands/list.js';
 import open from '../commands/open.js';
-import { openFileInEditor, parseJSON } from '../utils/helpers.js';
+import { openFileInEditor, parseJSON, listImages } from '../utils/helpers.js';
 import { options } from '../help/index.js';
 
 function parseConfig() {
@@ -143,8 +143,10 @@ yargs
       )
     ) {
       completionFilter((_err, _defaultCompletions) => {
-        const clipKeys = Object.keys(parseJSON(argv.clipsPath));
-        done(clipKeys);
+        const keys = argv.img
+          ? listImages(argv.imagesPath)
+          : Object.keys(parseJSON(argv.clipsPath));
+        done(keys);
       });
     } else if (argv._.includes('c') || argv._.includes('cfg')) {
       completionFilter((_err, _defaultCompletions) => {
