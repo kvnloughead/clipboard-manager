@@ -11,6 +11,7 @@ import { setFilePath } from '../middleware/index.js';
 
 import set from '../commands/set.js';
 import get from '../commands/get.js';
+import paste from '../commands/paste.js';
 import remove from '../commands/remove.js';
 import list from '../commands/list.js';
 import open from '../commands/open.js';
@@ -83,6 +84,17 @@ yargs
     get,
   )
   .command(
+    ['paste [key]', 'p'],
+    "outputs the value cb[key] to stdout. Images aren't",
+    (yargs) => {
+      yargs.positional('key', {
+        describe: 'key to access from data file',
+        default: 0,
+      });
+    },
+    paste,
+  )
+  .command(
     ['remove <key>', 'rm <key>', 'r <key>', 'del <key>', 'd <key>'],
     'deletes the key:value pair',
     (yargs) => {
@@ -138,9 +150,19 @@ yargs
   .alias('h', 'help')
   .completion('completion', function (_current, argv, completionFilter, done) {
     if (
-      ['g', 'get', 's', 'set', 'rm', 'remove', 'd', 'del', 'r'].some((val) =>
-        argv._.includes(val),
-      )
+      [
+        'g',
+        'get',
+        'p',
+        'paste',
+        's',
+        'set',
+        'rm',
+        'remove',
+        'd',
+        'del',
+        'r',
+      ].some((val) => argv._.includes(val))
     ) {
       completionFilter((_err, _defaultCompletions) => {
         const keys = argv.img
