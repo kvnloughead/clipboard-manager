@@ -8,6 +8,7 @@ import { ERRORS } from '../utils/errors.js';
 
 function get(args) {
   const { file, imagesPath, key, config } = args;
+  const isTTY = Boolean(process.stdout.isTTY);
 
   if (!args.img) {
     const data = parseJSON(file);
@@ -15,7 +16,7 @@ function get(args) {
     if (!data[key]) {
       console.error(ERRORS.MISSING_KEY(key, fname, config));
     } else {
-      clipboard.writeSync(data[key]);
+      isTTY ? clipboard.writeSync(data[key]) : console.log(data[key]);
     }
   } else {
     const file = path.join(imagesPath, key.toString() + '.png');
