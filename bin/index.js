@@ -118,18 +118,29 @@ yargs
         : openFileInEditor(rest.editor, configPath);
     },
   )
+  .option('verbose', {
+    type: 'boolean',
+    describe: options.verbose.details('main'),
+  })
   .command(
     ['list [pattern]', 'l'],
-    'Outputs list of current clips to the terminal.',
+    'Outputs list of current clips to the terminal. If the verbose flag is set, pattern matching checks values as well as keys.',
     (yargs) => {
       yargs.positional('pattern', {
         describe: 'pattern to match',
         default: '',
         type: 'string',
       });
-      yargs.option('verbose', options.verbose.details('list'));
-      yargs.option('img', options.img.details('list'));
+      yargs.option('verbose', {
+        type: 'boolean',
+        describe: options.verbose.details('list'),
+      });
+      yargs.option('img', {
+        type: 'boolean',
+        describe: options.img.details('list'),
+      });
       yargs.option('pretty', {
+        type: 'boolean',
         description: 'Makes output look nicer, arguably.',
         alias: 'p',
       });

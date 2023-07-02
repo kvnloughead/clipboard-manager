@@ -9,6 +9,9 @@ import {
 
 function listVerbosely(data, columns, padding) {
   let res = `\n`;
+  // const reFiltered = filterObj(JSON.parse(fs.readFileSync(file)), (k, v) => {
+  //   return k.match(pattern) || v.match(pattern);
+  // });
   Object.entries(data).forEach(([k, v]) => {
     const key = k.padStart(padding, ' ');
     let val = v.replace(/\n/g, '\\n').trim();
@@ -32,6 +35,7 @@ function listVerbosely(data, columns, padding) {
  */
 function list(args) {
   const { file, pretty, verbose, imagesPath, pattern } = args;
+  console.log(args);
 
   if (args.img) {
     console.log(listImages(imagesPath, pattern).join('\n'));
@@ -39,6 +43,9 @@ function list(args) {
   }
 
   const data = filterObj(JSON.parse(fs.readFileSync(file)), (k, v) => {
+    if (args.verbose) {
+      return k.match(pattern) || v.match(pattern);
+    }
     return k.match(pattern);
   });
   const maxKeyLength = Math.max(...Object.keys(data).map((k) => k.length));

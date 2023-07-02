@@ -24,7 +24,7 @@ export const options = {
     'verbose',
     {
       main: 'Provide verbose logging',
-      list: 'Include values in the printed output',
+      list: 'Include values in the printed output. When a pattern is supplied along with the -v flag, the pattern matching applies to the values of the clips, not just their keys.',
     },
     { alias: 'v' },
   ),
