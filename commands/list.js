@@ -7,6 +7,17 @@ import {
   filterObj,
 } from '../utils/helpers.js';
 
+function listVerbosely(data, columns, padding) {
+  let res = `\n`;
+  Object.entries(data).forEach(([k, v]) => {
+    const key = k.padStart(padding, ' ');
+    let val = v.replace(/\n/g, '\\n').trim();
+    val = columns ? truncateString(val, columns / 2, { ellipsis: false }) : val;
+    res += `${key}\t${val}\n`;
+  });
+  console.log(res + `\n`);
+}
+
 /**
  * Lists all key/value pairs in clips file. Can be ugly or less ugly.
  * The ugly version supports pipes better.
@@ -21,29 +32,22 @@ import {
  */
 function list(args) {
   const { file, pretty, verbose, imagesPath, pattern } = args;
+
   if (args.img) {
     console.log(listImages(imagesPath, pattern).join('\n'));
     return;
   }
+
   const data = filterObj(JSON.parse(fs.readFileSync(file)), (k, v) => {
     return k.match(pattern);
   });
   const maxKeyLength = Math.max(...Object.keys(data).map((k) => k.length));
   const { columns } = process.stdout; // when piping, this will be undefined
+
   if (pretty) {
     printTableFromObject(data, columns, { key: maxKeyLength });
   } else if (verbose) {
-    let res = `\n`;
-    Object.entries(data).forEach(([k, v]) => {
-      const key = k.padStart(maxKeyLength, ' ');
-      let val = v.replace(/\n/g, '\\n').trim();
-      // TODO - figure out how to determine terminal width when piping
-      val = columns
-        ? truncateString(val, columns / 2, { ellipsis: false })
-        : val;
-      res += `${key}\t${val}\n`;
-    });
-    console.log(res + `\n`);
+    listVerbosely(data, columns, maxKeyLength);
   } else {
     Object.entries(data).forEach(([k, v]) => {
       console.log(k);
