@@ -23,13 +23,11 @@ function remove(args) {
   if (force) {
     deleteClip(data, args);
   } else {
-    promptForConfirmation(
-      `Are you sure you want to delete clip "${key}"?`,
-      `Exiting without deleting clip`,
-      () => {
-        deleteClip(data, args);
-      },
-    );
+    promptForConfirmation(args, {
+      userPrompt: `Are you sure you want to delete ${key} in ${file}?`,
+      onExit: `Exiting without deleting ${key}`,
+      onConfirm: () => deleteClip(data, args),
+    });
   }
 }
 

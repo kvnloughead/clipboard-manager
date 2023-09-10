@@ -13,20 +13,33 @@ export function parseJSON(file) {
 }
 
 function parseYes(str) {
-  return ['yes', 'y'].includes(str.toLowerCase());
+  return str && ['yes', 'y'].includes(str.toLowerCase());
 }
 
-export function filterObj(obj, callback) {
+export function filterObj(obj, onConfirm) {
   return Object.fromEntries(
-    Object.entries(obj).filter(([k, v]) => callback(k, v)),
+    Object.entries(obj).filter(([k, v]) => onConfirm(k, v)),
   );
 }
 
-export function promptForConfirmation(userPrompt, onExit, callback) {
+export function promptForConfirmation(
+  args,
+  { userPrompt, onExit = 'Operation was canceled by the user.', onConfirm },
+) {
   prompt.start();
+
   prompt.get([{ name: 'confirmation', message: userPrompt }], (err, result) => {
-    if (parseYes(result.confirmation)) {
-      callback();
+    if (err) {
+      if (err.message !== 'canceled' || args.verbose) {
+        console.error('An error occurred:', err);
+      }
+      if (!result) console.log(); // ensure sigint logs newline before message
+      console.log(onExit);
+      return;
+    }
+
+    if (result && parseYes(result.confirmation)) {
+      onConfirm();
     } else {
       console.log(onExit);
     }

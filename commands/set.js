@@ -33,11 +33,11 @@ function set(args) {
   if (force || (!args.img && !data[key]) || (args.img && !data.includes(key))) {
     setClip(args);
   } else {
-    promptForConfirmation(
-      `Are you sure you want to overwrite ${key} in ${file}?`,
-      `Exiting without setting ${key}`,
-      () => setClip(args),
-    );
+    promptForConfirmation(args, {
+      userPrompt: `Are you sure you want to overwrite ${key} in ${file}?`,
+      onExit: `Exiting without setting ${key}`,
+      onConfirm: () => setClip(args),
+    });
   }
 }
 
