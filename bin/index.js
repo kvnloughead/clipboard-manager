@@ -7,7 +7,7 @@ import * as dotenv from 'dotenv';
 const yargs = _yargs(hideBin(process.argv));
 dotenv.config();
 
-import { setFilePath } from '../middleware/index.js';
+import { setFilePath, debug } from '../middleware/index.js';
 
 import set from '../commands/set.js';
 import get from '../commands/get.js';
@@ -57,6 +57,7 @@ yargs
     configPath: `/home/${process.env.USER}/.config/cb/settings.json`,
   })
   .middleware(setFilePath)
+  .middleware(debug)
   .command(
     ['set [key]', 's'],
     'assigns clipboard contents to data[key]',

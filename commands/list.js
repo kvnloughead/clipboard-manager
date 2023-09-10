@@ -35,7 +35,6 @@ function listVerbosely(data, columns, padding) {
  */
 function list(args) {
   const { file, pretty, verbose, imagesPath, pattern } = args;
-  console.log(args);
 
   if (args.img) {
     console.log(listImages(imagesPath, pattern).join('\n'));
