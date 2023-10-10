@@ -1,11 +1,11 @@
-import fs from 'fs';
+import fs from "fs";
 
 import {
   listImages,
   printTableFromObject,
   truncateString,
   filterObj,
-} from '../utils/helpers.js';
+} from "../utils/helpers.js";
 
 function listVerbosely(data, columns, padding) {
   let res = `\n`;
@@ -13,8 +13,8 @@ function listVerbosely(data, columns, padding) {
   //   return k.match(pattern) || v.match(pattern);
   // });
   Object.entries(data).forEach(([k, v]) => {
-    const key = k.padStart(padding, ' ');
-    let val = v.replace(/\n/g, '\\n').trim();
+    const key = k.padStart(padding, " ");
+    let val = v.replace(/\n/g, "\\n").trim();
     val = columns ? truncateString(val, columns / 2, { ellipsis: false }) : val;
     res += `${key}\t${val}\n`;
   });
@@ -37,7 +37,7 @@ function list(args) {
   const { file, pretty, verbose, imagesPath, pattern } = args;
 
   if (args.img) {
-    console.log(listImages(imagesPath, pattern).join('\n'));
+    console.log(listImages(imagesPath, pattern).join("\n"));
     return;
   }
 

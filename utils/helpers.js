@@ -1,11 +1,11 @@
-import fs from 'fs';
-import fsPromises from 'fs.promises';
-import path from 'path';
-import { spawn } from 'child_process';
-import prompt from 'prompt';
+import fs from "fs";
+import fsPromises from "fs.promises";
+import path from "path";
+import { spawn } from "child_process";
+import prompt from "prompt";
 
 export function openFileInEditor(editor, file) {
-  spawn(editor, [file], { stdio: 'inherit' });
+  spawn(editor, [file], { stdio: "inherit" });
 }
 
 export function parseJSON(file) {
@@ -13,7 +13,7 @@ export function parseJSON(file) {
 }
 
 function parseYes(str) {
-  return str && ['yes', 'y'].includes(str.toLowerCase());
+  return str && ["yes", "y"].includes(str.toLowerCase());
 }
 
 export function filterObj(obj, onConfirm) {
@@ -24,14 +24,14 @@ export function filterObj(obj, onConfirm) {
 
 export function promptForConfirmation(
   args,
-  { userPrompt, onExit = 'Operation was canceled by the user.', onConfirm },
+  { userPrompt, onExit = "Operation was canceled by the user.", onConfirm },
 ) {
   prompt.start();
 
-  prompt.get([{ name: 'confirmation', message: userPrompt }], (err, result) => {
+  prompt.get([{ name: "confirmation", message: userPrompt }], (err, result) => {
     if (err) {
-      if (err.message !== 'canceled' || args.verbose) {
-        console.error('An error occurred:', err);
+      if (err.message !== "canceled" || args.verbose) {
+        console.error("An error occurred:", err);
       }
       if (!result) console.log(); // ensure sigint logs newline before message
       console.log(onExit);
@@ -56,7 +56,7 @@ export function promptForConfirmation(
  */
 export function truncateString(s, length, { ellipsis = true }) {
   if (ellipsis) {
-    return s.length < length ? s : s.substring(0, length - 3) + '...';
+    return s.length < length ? s : s.substring(0, length - 3) + "...";
   }
   return s.length < length ? s : s.substring(0, length);
 }
@@ -73,10 +73,10 @@ export function truncateString(s, length, { ellipsis = true }) {
 export function printTableFromObject(obj, width, padding) {
   const columns = Object.fromEntries(
     Object.entries(obj).map(([k, v]) => {
-      const key = padding.key ? k.padStart(padding.key, ' ') : k;
+      const key = padding.key ? k.padStart(padding.key, " ") : k;
       let newVal = v.trim();
       newVal = truncateString(newVal, width / 2, {});
-      newVal = padding.val ? newVal.padStart(padding.val, ' ') : newVal;
+      newVal = padding.val ? newVal.padStart(padding.val, " ") : newVal;
       return [key, newVal];
     }),
   );
@@ -108,7 +108,7 @@ export async function createAndWriteToFile(file, contents, options = {}) {
 }
 
 // Returns an array of files that match pattern in dirpath
-export function ls(dirpath, pattern = '') {
+export function ls(dirpath, pattern = "") {
   return fs
     .readdirSync(dirpath, { withFileTypes: true })
     .filter((item) => !item.isDirectory())
@@ -116,6 +116,6 @@ export function ls(dirpath, pattern = '') {
     .map((item) => item.name);
 }
 
-export function listImages(dirpath, pattern = '') {
+export function listImages(dirpath, pattern = "") {
   return ls(dirpath, pattern).map((fname) => path.parse(fname).name);
 }

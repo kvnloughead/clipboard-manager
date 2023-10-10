@@ -1,8 +1,8 @@
-import fs from 'fs';
+import fs from "fs";
 
-import { ERRORS } from '../utils/errors.js';
-import { VERBOSE_MESSAGES } from '../utils/messages.js';
-import { promptForConfirmation } from '../utils/helpers.js';
+import { ERRORS } from "../utils/errors.js";
+import { VERBOSE_MESSAGES } from "../utils/messages.js";
+import { promptForConfirmation } from "../utils/helpers.js";
 
 function deleteClip(data, args) {
   const { file, key, verbose } = args;
@@ -15,7 +15,7 @@ function deleteClip(data, args) {
 function remove(args) {
   const { file, key, config, verbose, force } = args;
   const data = JSON.parse(fs.readFileSync(file));
-  const fname = config ? 'config' : 'clips';
+  const fname = config ? "config" : "clips";
   if (!data[key]) {
     console.error(ERRORS.MISSING_KEY(key, fname, config));
     return;

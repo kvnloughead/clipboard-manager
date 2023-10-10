@@ -1,15 +1,15 @@
-import fs from 'fs';
-import { exec } from 'node:child_process';
-import path from 'path';
+import fs from "fs";
+import { exec } from "node:child_process";
+import path from "path";
 
-import { listImages, promptForConfirmation } from '../utils/helpers.js';
+import { listImages, promptForConfirmation } from "../utils/helpers.js";
 
 function setClip(args) {
   const { file, imagesPath, key, content } = args;
   exec(
     `xclip -selection clipboard -t image/png -o > ${path.join(
       imagesPath,
-      key.toString() + '.png',
+      key.toString() + ".png",
     )}`,
     (error, stdout, stderr) => {
       if (!args.img && (error || stderr)) {
@@ -17,7 +17,7 @@ function setClip(args) {
         data[key] = content;
         fs.writeFileSync(file, JSON.stringify(data, null, 2));
       } else if (error || stderr) {
-        console.error('Failed to save image');
+        console.error("Failed to save image");
       } else {
         console.log(`Image saved successfully`);
       }

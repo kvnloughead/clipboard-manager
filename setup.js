@@ -15,14 +15,14 @@ const HELP = `Usage: node setup.js [OPTIONS]
     node setup.js -h         Display this help message and exit
   `;
 
-import prompt from 'prompt';
+import prompt from "prompt";
 
-import { createAndWriteToFile } from './utils/helpers.js';
+import { createAndWriteToFile } from "./utils/helpers.js";
 
 const args = process.argv.slice(2).map((arg) => arg.toLowerCase());
-const noPrompt = args.some((val) => ['-y', '--y', 'y', 'yes'].includes(val));
-const verbose = args.some((val) => ['-v', '--v', 'verbose'].includes(val));
-const showHelp = args.some((val) => ['-h', '--help', 'help'].includes(val));
+const noPrompt = args.some((val) => ["-y", "--y", "y", "yes"].includes(val));
+const verbose = args.some((val) => ["-v", "--v", "verbose"].includes(val));
+const showHelp = args.some((val) => ["-h", "--help", "help"].includes(val));
 
 const defaultConfigPath = `/home/${process.env.USER}/.config/cb/defaults.json`;
 
@@ -75,7 +75,7 @@ if (showHelp) {
         message: `Please enter a valid file path`,
       },
       {
-        name: 'clipsPath',
+        name: "clipsPath",
         default: `/home/${process.env.USER}/.config/cb/clips.json`,
         description: `Where would you like to store your clips?`,
         message: `Please enter a valid file path`,

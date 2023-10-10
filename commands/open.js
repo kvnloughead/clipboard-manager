@@ -1,4 +1,4 @@
-import { openFileInEditor } from '../utils/helpers.js';
+import { openFileInEditor } from "../utils/helpers.js";
 
 function open(args) {
   openFileInEditor(args.editor, args.img ? args.imagesPath : args.file);
