@@ -23,7 +23,7 @@ function parseConfig() {
     `/home/${process.env.USER}/.config/cb/defaults.json`,
   );
   const configPath = defaults.configPath;
-  return parseJSON(configPath);
+  return { ...defaults, ...parseJSON(configPath) };
 }
 const config = parseConfig();
 
@@ -52,12 +52,9 @@ yargs
     },
   })
   .requiresArg("e")
-  .default({
-    clipsPath: `/home/${process.env.USER}/.config/cb/clips.json`,
-    configPath: `/home/${process.env.USER}/.config/cb/settings.json`,
-  })
   .middleware(setFilePath)
   .middleware(debug)
+
   .command(
     ["set [key]", "s"],
     "assigns clipboard contents to data[key]",
