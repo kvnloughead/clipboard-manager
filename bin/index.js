@@ -54,6 +54,7 @@ yargs
       type: "boolean",
     },
   })
+
   .requiresArg("e")
   .middleware(setFilePath)
   .middleware(debug)
@@ -166,11 +167,22 @@ yargs
   .command(["track"], "Start tracking clipboard history in background.", () => {
     const trackerPath = new URL("./tracker.js", import.meta.url).pathname;
 
-    const logPath = path.join(path.dirname(trackerPath), "tracker.log");
-    console.log(config);
+    const stdoutLog = path.join(
+      path.dirname(trackerPath),
+      "tracker_stdout.log",
+    );
+    const stderrLog = path.join(
+      path.dirname(trackerPath),
+      "tracker_stderr.log",
+    );
+
     const child = spawn("node", [trackerPath, JSON.stringify(config)], {
       detached: true,
-      stdio: ["ignore", fs.openSync(logPath, "a"), fs.openSync(logPath, "a")],
+      stdio: [
+        "ignore",
+        fs.openSync(stdoutLog, "a"),
+        fs.openSync(stderrLog, "a"),
+      ],
     });
 
     child.unref();
