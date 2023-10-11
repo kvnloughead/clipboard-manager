@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+import { spawn } from "child_process";
+import path from "path";
+import fs from "fs";
 
 import _yargs from "yargs";
 import clipboard from "clipboardy";
@@ -69,6 +72,7 @@ yargs
       set({ ...argv, content: clipboard.readSync() });
     },
   )
+
   .command(
     ["get [key]", "g"],
     "loads the value cb[key] to the clipboard",
@@ -81,6 +85,7 @@ yargs
     },
     get,
   )
+
   .command(
     ["paste [key]", "p"],
     "outputs the value cb[key] to stdout. Images aren't",
@@ -92,6 +97,7 @@ yargs
     },
     paste,
   )
+
   .command(
     ["remove <key>", "rm <key>", "r <key>", "del <key>", "d <key>"],
     "deletes the key:value pair",
@@ -102,6 +108,7 @@ yargs
     },
     remove,
   )
+
   .command(
     ["config [option]", "cfg"],
     "Sets a configuration option, or opens configuration file if no option is provided",
@@ -120,6 +127,7 @@ yargs
     type: "boolean",
     describe: options.verbose.details("main"),
   })
+
   .command(
     ["list [pattern]", "l"],
     "Outputs list of current clips to the terminal. If the verbose flag is set, pattern matching checks values as well as keys.",
@@ -145,6 +153,7 @@ yargs
     },
     list,
   )
+
   .command(
     ["open", "o"],
     "Opens clips file in editor.",
@@ -153,6 +162,21 @@ yargs
     },
     open,
   )
+
+  .command(["track"], "Start tracking clipboard history in background.", () => {
+    const trackerPath = new URL("./tracker.js", import.meta.url).pathname;
+
+    const logPath = path.join(path.dirname(trackerPath), "tracker.log");
+    console.log(config);
+    const child = spawn("node", [trackerPath, JSON.stringify(config)], {
+      detached: true,
+      stdio: ["ignore", fs.openSync(logPath, "a"), fs.openSync(logPath, "a")],
+    });
+
+    child.unref();
+    console.log("Started tracking clipboard in background.");
+  })
+
   .demandCommand()
   .showHelpOnFail(true)
   .help("h")
