@@ -6,8 +6,15 @@ const { trackerLogger } = loggers;
 
 const config = JSON.parse(process.argv[2]);
 const HISTORY_PATH = config.historyPath;
-console.log(HISTORY_PATH);
 let clipboardHistory = [];
+
+process.on("uncaughtException", (err) => {
+  trackerLogger.error("Uncaught Exception:", err);
+});
+
+process.on("uncaughtRejection", (reason, promise) => {
+  trackerLogger.error("Uncaught Rejection at:", promise, reason);
+});
 
 function trackClipboard() {
   let lastClipboardContent = clipboardy.readSync();
@@ -17,16 +24,12 @@ function trackClipboard() {
     if (currentClipboardContent !== lastClipboardContent) {
       clipboardHistory.push(currentClipboardContent);
       trackerLogger.info(
-        `New clipboard content detected: ${currentClipboardContent.substring(
-          0,
-          100,
-        )}...`,
+        `Clipboard updated: ${currentClipboardContent.substring(0, 100)}...`,
       );
 
       if (clipboardHistory.length > 10) {
         clipboardHistory.shift();
       }
-
       try {
         fs.writeFileSync(HISTORY_PATH, JSON.stringify(clipboardHistory));
         trackerLogger.info("Updated clipboard history file.");
