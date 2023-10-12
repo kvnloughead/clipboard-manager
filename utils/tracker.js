@@ -1,7 +1,7 @@
 import clipboardy from "clipboardy";
 import fs from "fs";
 
-import loggers from "../utils/logger.js";
+import loggers from "./logger.js";
 const { trackerLogger } = loggers;
 
 const config = JSON.parse(process.argv[2]);
@@ -13,7 +13,6 @@ function trackClipboard() {
   let lastClipboardContent = clipboardy.readSync();
 
   setInterval(() => {
-    console.log("here");
     let currentClipboardContent = clipboardy.readSync();
     if (currentClipboardContent !== lastClipboardContent) {
       clipboardHistory.push(currentClipboardContent);
@@ -23,6 +22,7 @@ function trackClipboard() {
           100,
         )}...`,
       );
+
       if (clipboardHistory.length > 10) {
         clipboardHistory.shift();
       }

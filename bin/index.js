@@ -1,7 +1,4 @@
 #!/usr/bin/env node
-import { spawn } from "child_process";
-import path from "path";
-import fs from "fs";
 
 import _yargs from "yargs";
 import clipboard from "clipboardy";
@@ -20,6 +17,7 @@ import list from "../commands/list.js";
 import open from "../commands/open.js";
 import { openFileInEditor, parseJSON, listImages } from "../utils/helpers.js";
 import { options } from "../help/index.js";
+import track from "../commands/track.js";
 
 function parseConfig() {
   const defaults = parseJSON(
@@ -164,30 +162,18 @@ yargs
     open,
   )
 
-  .command(["track"], "Start tracking clipboard history in background.", () => {
-    const trackerPath = new URL("./tracker.js", import.meta.url).pathname;
-
-    const stdoutLog = path.join(
-      path.dirname(trackerPath),
-      "tracker_stdout.log",
-    );
-    const stderrLog = path.join(
-      path.dirname(trackerPath),
-      "tracker_stderr.log",
-    );
-
-    const child = spawn("node", [trackerPath, JSON.stringify(config)], {
-      detached: true,
-      stdio: [
-        "ignore",
-        fs.openSync(stdoutLog, "a"),
-        fs.openSync(stderrLog, "a"),
-      ],
-    });
-
-    child.unref();
-    console.log("Started tracking clipboard in background.");
-  })
+  .command(
+    ["track <action>"],
+    "Start, stop, or restart tracking clipboard history in background.",
+    (yargs) => {
+      yargs.positional("action", {
+        describe: "Action to take",
+        type: "string",
+        choices: ["start", "stop", "restart"],
+      });
+    },
+    track,
+  )
 
   .demandCommand()
   .showHelpOnFail(true)
