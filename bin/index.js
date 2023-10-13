@@ -17,7 +17,7 @@ import list from "../commands/list.js";
 import open from "../commands/open.js";
 import { openFileInEditor, parseJSON, listImages } from "../utils/helpers.js";
 import { options } from "../help/index.js";
-import track from "../commands/track.js";
+import tracker from "../commands/tracker.js";
 
 function parseConfig() {
   const defaults = parseJSON(
@@ -163,7 +163,7 @@ yargs
   )
 
   .command(
-    ["track <action>"],
+    ["tracker <action>"],
     "Start, stop, or restart tracking clipboard history in background.",
     (yargs) => {
       yargs.positional("action", {
@@ -172,7 +172,7 @@ yargs
         choices: ["start", "stop", "restart"],
       });
     },
-    track,
+    tracker,
   )
 
   .demandCommand()

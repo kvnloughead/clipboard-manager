@@ -1,6 +1,6 @@
 import { spawn } from "child_process";
 
-function track(args) {
+function tracker(args) {
   const trackerPath = new URL("../utils/tracker.js", import.meta.url).pathname;
 
   const child = spawn("node", [trackerPath, JSON.stringify(args)], {
@@ -14,4 +14,4 @@ function track(args) {
   process.exit(0);
 }
 
-export default track;
+export default tracker;
