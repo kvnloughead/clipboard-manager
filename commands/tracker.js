@@ -9,13 +9,22 @@ function tracker(args) {
     const trackerPath = new URL("../utils/tracker.js", import.meta.url)
       .pathname;
 
+    // prevent duplicate processes from running
+    const pid = parseInt(fs.readFileSync(trackerPidPath, "utf-8"));
+    if (Number.isInteger(pid)) {
+      console.log(
+        `Process with id ${pid} is already running. \nTry running \`cb tracker stop\` or \`cb tracker restart\` instead.`,
+      );
+      return;
+    }
+
     const child = spawn("node", [trackerPath, JSON.stringify(args)], {
       detached: true,
       setsid: true,
       stdio: ["ignore", "inherit", "inherit"],
     });
 
-    // save process pid for easy stopping
+    // save process pid to file for easy stopping
     fs.writeFileSync(trackerPidPath, child.pid.toString());
 
     console.log("Started tracking clipboard in background.");
