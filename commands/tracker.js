@@ -52,13 +52,17 @@ function tracker(args) {
     start();
   }
 
-  if (args.action === "start") {
-    start();
-  } else if (args.action === "stop") {
-    stop();
-  } else if (args.action === "restart") {
-    restart();
+  function status() {
+    const pid = parseInt(fs.readFileSync(trackerPidPath, "utf-8"));
+    if (Number.isInteger(pid)) {
+      console.log(`Tracker is running with process id ${pid}.`);
+    } else {
+      console.log(`No process is running.`);
+    }
   }
+
+  const actions = { start, stop, restart, status };
+  actions[args.action]();
 }
 
 export default tracker;

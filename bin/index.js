@@ -164,12 +164,12 @@ yargs
 
   .command(
     ["tracker <action>"],
-    "Start, stop, or restart tracking clipboard history in background.",
+    "Check status, start, stop, or restart tracking clipboard history in background.",
     (yargs) => {
       yargs.positional("action", {
         describe: "Action to take",
         type: "string",
-        choices: ["start", "stop", "restart"],
+        choices: ["start", "status", "stop", "restart"],
       });
     },
     tracker,
