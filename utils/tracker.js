@@ -31,7 +31,10 @@ function trackClipboard() {
         clipboardHistory.shift();
       }
       try {
-        fs.writeFileSync(HISTORY_PATH, JSON.stringify(clipboardHistory));
+        fs.writeFileSync(
+          HISTORY_PATH,
+          JSON.stringify(clipboardHistory, undefined, 2),
+        );
         trackerLogger.info("Updated clipboard history file.");
       } catch (err) {
         trackerLogger.error(
