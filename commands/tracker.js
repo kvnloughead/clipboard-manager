@@ -3,13 +3,18 @@ import fs from "fs";
 import path from "path";
 
 function tracker(args) {
+  // Create directory and file if they don't exist.
   const trackerPidPath = path.join(args.logsPath, "tracker.pid");
+  if (!fs.existsSync(trackerPidPath)) {
+    fs.mkdirSync(args.logsPath, { recursive: true });
+    fs.writeFileSync(trackerPidPath, "");
+  }
 
   function start() {
     const trackerPath = new URL("../utils/tracker.js", import.meta.url)
       .pathname;
 
-    // prevent duplicate processes from running
+    // Prevent duplicate processes from running.
     const pid = parseInt(fs.readFileSync(trackerPidPath, "utf-8"));
     if (Number.isInteger(pid)) {
       console.log(
@@ -24,7 +29,7 @@ function tracker(args) {
       stdio: ["ignore", "inherit", "inherit"],
     });
 
-    // save process pid to file for easy stopping
+    // Save process pid to file for easy stopping.
     fs.writeFileSync(trackerPidPath, child.pid.toString());
 
     console.log("Started tracking clipboard in background.");
