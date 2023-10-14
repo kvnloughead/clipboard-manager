@@ -5,7 +5,7 @@ import loggers from "./logger.js";
 const { trackerLogger } = loggers;
 
 const config = JSON.parse(process.argv[2]);
-const HISTORY_PATH = config.historyPath;
+const HISTORY_PATH = config.historyFile;
 let clipboardHistory = [];
 
 process.on("uncaughtException", (err) => {

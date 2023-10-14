@@ -24,22 +24,22 @@ const noPrompt = args.some((val) => ["-y", "--y", "y", "yes"].includes(val));
 const verbose = args.some((val) => ["-v", "--v", "verbose"].includes(val));
 const showHelp = args.some((val) => ["-h", "--help", "help"].includes(val));
 
-const defaultConfigPath = `/home/${process.env.USER}/.config/cb/defaults.json`;
+const defaultconfigFile = `/home/${process.env.USER}/.config/cb/defaults.json`;
 
 async function promptUser(err, result) {
-  const [clipsPath, configPath] = [result.clipsPath, result.configPath];
+  const [clipsFile, configFile] = [result.clipsFile, result.configFile];
   try {
-    await createAndWriteToFile(clipsPath, `{}`, { recursive: true });
+    await createAndWriteToFile(clipsFile, `{}`, { recursive: true });
     await createAndWriteToFile(
-      configPath,
-      JSON.stringify({ clipsPath, configPath }, undefined, 2),
+      configFile,
+      JSON.stringify({ clipsFile, configFile }, undefined, 2),
       {
         recursive: true,
       },
     );
     await createAndWriteToFile(
-      defaultConfigPath,
-      JSON.stringify({ clipsPath, configPath }, undefined, 2),
+      defaultconfigFile,
+      JSON.stringify({ clipsFile, configFile }, undefined, 2),
       {
         recursive: true,
       },
@@ -62,20 +62,20 @@ if (showHelp) {
   console.log(HELP);
 } else if (noPrompt) {
   promptUser(null, {
-    clipsPath: `/home/${process.env.USER}/.config/cb/clips.json`,
-    configPath: `/home/${process.env.USER}/.config/cb/settings.json`,
+    clipsFile: `/home/${process.env.USER}/.config/cb/clips.json`,
+    configFile: `/home/${process.env.USER}/.config/cb/settings.json`,
   });
 } else {
   prompt.get(
     [
       {
-        name: `configPath`,
+        name: `configFile`,
         default: `/home/${process.env.USER}/.config/cb/settings.json`,
         description: `Where would you like to store your default configuration file?`,
         message: `Please enter a valid file path`,
       },
       {
-        name: "clipsPath",
+        name: "clipsFile",
         default: `/home/${process.env.USER}/.config/cb/clips.json`,
         description: `Where would you like to store your clips?`,
         message: `Please enter a valid file path`,

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import _yargs from "yargs";
+import path from "path";
 import clipboard from "clipboardy";
 import { hideBin } from "yargs/helpers";
 import * as dotenv from "dotenv";
@@ -19,12 +20,30 @@ import { openFileInEditor, parseJSON, listImages } from "../utils/helpers.js";
 import { options } from "../help/index.js";
 import tracker from "../commands/tracker.js";
 
+// OS agnostic home directory
+const userDir = process.env.HOME || process.env.USERPROFILE;
+const defaultPath = path.join(userDir, ".config", "cb");
+
+const defaults = {
+  configPath: defaultPath,
+  dataPath: defaultPath,
+  defaultsFile: path.join(defaultPath, "defaults.json"),
+  configFile: path.join(defaultPath, "settings.json"),
+  clipsFile: path.join(defaultPath, "clips.json"),
+  historyFile: path.join(defaultPath, "history.json"),
+  imagesPath: path.join(defaultPath, "images"),
+  logsPath: path.join(defaultPath, "logs"),
+};
+
 function parseConfig() {
-  const defaults = parseJSON(
-    `/home/${process.env.USER}/.config/cb/defaults.json`,
-  );
-  const configPath = defaults.configPath;
-  return { ...defaults, ...parseJSON(configPath) };
+  // Grab user specified defaults from file.
+  const userDefaults = parseJSON(defaults.defaultsFile);
+
+  // If a different config file is specified in the defaults, grab that.
+  const configFile = userDefaults.configFile || defaults.configFile;
+
+  // Merge initial config and return. Doesn't include argv.
+  return { ...defaults, ...userDefaults, ...parseJSON(configFile) };
 }
 const config = parseConfig();
 
@@ -116,10 +135,10 @@ yargs
         describe: "the option to configure",
       });
     },
-    ({ configPath, option, ...rest }) => {
+    ({ configFile, option, ...rest }) => {
       option
-        ? set({ ...rest, file: configPath, key: option })
-        : openFileInEditor(rest.editor, configPath);
+        ? set({ ...rest, file: configFile, key: option })
+        : openFileInEditor(rest.editor, configFile);
     },
   )
   .option("verbose", {
@@ -198,12 +217,12 @@ yargs
       completionFilter((_err, _defaultCompletions) => {
         const keys = argv.img
           ? listImages(argv.imagesPath)
-          : Object.keys(parseJSON(argv.clipsPath));
+          : Object.keys(parseJSON(argv.clipsFile));
         done(keys);
       });
     } else if (argv._.includes("c") || argv._.includes("cfg")) {
       completionFilter((_err, _defaultCompletions) => {
-        const configKeys = Object.keys(parseJSON(argv.configPath));
+        const configKeys = Object.keys(parseJSON(argv.configFile));
         done(configKeys);
       });
     } else {

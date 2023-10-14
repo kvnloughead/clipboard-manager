@@ -52,9 +52,9 @@ cb open       # opens the clip file in your $EDITOR
 
   -h, --help           Show help                                       [boolean]
 
-      --clipsPath      File to store clippings in                       [string]
+      --clipsFile      File to store clippings in                       [string]
                                         [default: "$HOME/.config/cb/clips.json"]
 
-      --configPath      File to store configuration in                  [string]
+      --configFile      File to store configuration in                  [string]
                                      [default: "$HOME/.config/cb/settings.json"]
 ```
