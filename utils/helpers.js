@@ -9,7 +9,24 @@ export function openFileInEditor(editor, file) {
 }
 
 export function parseJSON(file) {
-  return JSON.parse(fs.readFileSync(file));
+  // Check if the file path is valid
+  if (typeof file !== "string" || path.isAbsolute(file) === false) {
+    throw new Error("Invalid file path provided");
+  }
+
+  // If the file doesn't exist, create it with an empty object
+  if (!fs.existsSync(file)) {
+    fs.writeFileSync(file, JSON.stringify({}));
+  } else {
+    // If the file exists but is empty, add an empty object to it
+    const fileContents = fs.readFileSync(file, "utf8");
+    if (!fileContents.trim()) {
+      fs.writeFileSync(file, JSON.stringify({}));
+    }
+  }
+
+  // Return the parsed JSON
+  return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 
 function parseYes(str) {
