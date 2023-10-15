@@ -190,6 +190,11 @@ yargs
         type: "string",
         choices: ["start", "status", "stop", "restart"],
       });
+      yargs.option("maxClipHistory", {
+        type: "number",
+        describe: "Maximum number of clips to store",
+        default: 50,
+      });
     },
     tracker,
   )

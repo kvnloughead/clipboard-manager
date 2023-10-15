@@ -27,7 +27,7 @@ function trackClipboard() {
         `Clipboard updated: ${currentClipboardContent.substring(0, 100)}...`,
       );
 
-      if (clipboardHistory.length > 10) {
+      if (clipboardHistory.length > (config.maxClipHistory || 50)) {
         clipboardHistory.shift();
       }
       try {
