@@ -25,8 +25,6 @@ for (const [name, option] of Object.entries(options)) {
   defaults[name] = option.getDetails().default;
 }
 
-console.log({ defaults });
-
 function parseConfig() {
   // Grab user specified defaults from file.
   const userDefaults = parseJSON(defaults.defaultsFile);
