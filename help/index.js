@@ -1,3 +1,7 @@
+import path from "path";
+const userDir = process.env.HOME || process.env.USERPROFILE;
+const defaultPath = path.join(userDir, ".config", "cb");
+
 class Option {
   constructor(name, help, settings) {
     this.name = name;
@@ -76,5 +80,41 @@ export const options = {
       default: false,
       type: "boolean",
     },
+  ),
+
+  defaultsFile: new Option(
+    "defaultsFile",
+    { default: "Path to file to store user specified default settings in." },
+    { default: path.join(defaultPath, "defaults.json"), type: "string" },
+  ),
+  configFile: new Option(
+    "configFile",
+    {
+      default:
+        "Path to file to store user specified settings. Overwrites the the default settings.",
+    },
+    { default: path.join(defaultPath, "settings.json"), type: "string" },
+  ),
+  clipsFile: new Option(
+    "clipsFile",
+    { default: "Path to file to store clips in." },
+    { default: path.join(defaultPath, "clips.json"), type: "string" },
+  ),
+  imagesPath: new Option(
+    "imagesPath",
+    { default: "Path to directory to store images in." },
+    { default: path.join(defaultPath, "images"), type: "string" },
+  ),
+
+  historyFile: new Option(
+    "historyFile",
+    { tracker: "Path to file where clipboard history should be stored." },
+    { default: path.join(defaultPath, "history.json"), type: "string" },
+  ),
+
+  logsPath: new Option(
+    "logsPath",
+    { default: "Path to directory to store logs in." },
+    { default: path.join(defaultPath, "logs"), type: "string" },
   ),
 };

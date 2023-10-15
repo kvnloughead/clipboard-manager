@@ -20,20 +20,12 @@ import { parseJSON, listImages } from "../utils/helpers.js";
 import { options } from "../help/index.js";
 import tracker from "../commands/tracker.js";
 
-// OS agnostic home directory
-const userDir = process.env.HOME || process.env.USERPROFILE;
-const defaultPath = path.join(userDir, ".config", "cb");
+let defaults = {};
+for (const [name, option] of Object.entries(options)) {
+  defaults[name] = option.getDetails().default;
+}
 
-const defaults = {
-  configPath: defaultPath,
-  dataPath: defaultPath,
-  defaultsFile: path.join(defaultPath, "defaults.json"),
-  configFile: path.join(defaultPath, "settings.json"),
-  clipsFile: path.join(defaultPath, "clips.json"),
-  historyFile: path.join(defaultPath, "history.json"),
-  imagesPath: path.join(defaultPath, "images"),
-  logsPath: path.join(defaultPath, "logs"),
-};
+console.log({ defaults });
 
 function parseConfig() {
   // Grab user specified defaults from file.
@@ -50,6 +42,9 @@ const config = parseConfig();
 yargs
   .env("CB")
   .option("verbose", options.verbose.getDetails("main"))
+  .option("defaultsFile", options.defaultsFile.getDetails("main"))
+  .option("configFile", options.configFile.getDetails("main"))
+  .option("clipsFile", options.clipsFile.getDetails("main"))
   .middleware(setFilePath)
   .middleware(debug)
 
@@ -64,6 +59,7 @@ yargs
       yargs.option("img", options.img.getDetails("set"));
       yargs.option("force", options.force.getDetails("set"));
       yargs.option("config", options.config.getDetails("set"));
+      yargs.option("imagesPath", options.imagesPath.getDetails("set"));
     },
     (argv) => {
       set({ ...argv, content: clipboard.readSync() });
@@ -80,6 +76,7 @@ yargs
       });
       yargs.option("img", options.img.getDetails("get"));
       yargs.option("config", options.config.getDetails("get"));
+      yargs.option("imagesPath", options.imagesPath.getDetails("get"));
     },
     get,
   )
@@ -122,6 +119,7 @@ yargs
       yargs.option("verbose", options.verbose.getDetails("list"));
       yargs.option("config", options.config.getDetails("list"));
       yargs.option("img", options.img.getDetails("list"));
+      yargs.option("imagesPath", options.imagesPath.getDetails("list"));
       yargs.option("pretty", {
         type: "boolean",
         description: "Makes output look nicer, arguably.",
@@ -138,6 +136,7 @@ yargs
       yargs.option("img", options.img.getDetails("open"));
       yargs.option("editor", options.editor.getDetails("open"));
       yargs.option("config", options.config.getDetails("open"));
+      yargs.option("imagesPath", options.imagesPath.getDetails("open"));
     },
     open,
   )
@@ -156,6 +155,8 @@ yargs
         describe: "Maximum number of clips to store",
         default: 50,
       });
+      yargs.option("historyFile", options.historyFile.getDetails("tracker"));
+      yargs.option("logsPath", options.logsPath.getDetails("tracker"));
     },
     tracker,
   )
