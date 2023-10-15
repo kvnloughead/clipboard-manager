@@ -6,7 +6,7 @@ class Option {
   }
 
   _getDescription(command) {
-    return { description: this._help[command] };
+    return { description: this._help[command] || this._help.default };
   }
 
   getDetails(command) {

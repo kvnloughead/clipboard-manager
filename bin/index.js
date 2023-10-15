@@ -50,7 +50,6 @@ const config = parseConfig();
 yargs
   .env("CB")
   .option("verbose", options.verbose.getDetails("main"))
-  .option("img", options.img.getDetails("main"))
   .options({
     e: {
       alias: "editor",
@@ -171,7 +170,7 @@ yargs
   .command(
     ["open", "o"],
     "Opens clips file in editor.",
-    () => {
+    (yargs) => {
       yargs.option("img", options.img.getDetails("open"));
     },
     open,
