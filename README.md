@@ -25,36 +25,34 @@ source ~/.bashrc
 
 On OSX, use `.bash_profile` instead of `.bashrc`.
 
-## Usage
+## Commands
 
 ```
-cb set [key]  # adds current clipboard content to clips file, with the given key
-cb set        # defaults to a key of `0`
-cb get [key]  # loads the value associated with key to the clipboard
-cb get        # defaults to a key of `0`
-cb rm <key>   # removes the key/value pair from the clips file
-cb list       # lists all keys/value pairs in the clip file
-cb open       # opens the clip file in your $EDITOR
+  cb set [key]         assigns clipboard contents to data[key]      [aliases: s]
+  cb get [key]         loads the value cb[key] to the clipboard     [aliases: g]
+  cb paste [key]       outputs the value cb[key] to stdout. Images aren't
+                                                                    [aliases: p]
+  cb remove <key>      deletes the key:value pair       [aliases: rm, r, del, d]
+  cb list [pattern]    Outputs list of current clips to the terminal. If the ver
+                       bose flag is set, pattern matching checks values as well
+                       as keys.                                     [aliases: l]
+  cb open              Opens clips file in editor.                  [aliases: o]
+  cb tracker <action>  Check status, start, stop, or restart tracking clipboard
+                       history in background.
+  cb completion        generate completion script
 ```
 
 ## Options
 
 ```
-      --version        Show version number                             [boolean]
-
-  -e, --editor         Editor to use to open config or data files       [string]
-                                                                [default: "vim"]
-
-  -c, --cfg, --config  Path to JSON config file                        [boolean]
-                                                                [default: false]
-
-  -v, --verbose        Run with verbose logging                        [boolean]
-
-  -h, --help           Show help                                       [boolean]
-
-      --clipsFile      File to store clippings in                       [string]
-                                        [default: "$HOME/.config/cb/clips.json"]
-
-      --configFile      File to store configuration in                  [string]
-                                     [default: "$HOME/.config/cb/settings.json"]
+      --version       Show version number                              [boolean]
+  -v, --verbose       Provide verbose logging.        [boolean] [default: false]
+      --defaultsFile  Path to file to store user specified default settings in.
+                      [string] [default: "/home/kevin/.config/cb/defaults.json"]
+      --configFile    Path to file to store user specified settings. Overwrites
+                      the the default settings.
+                      [string] [default: "/home/kevin/.config/cb/settings.json"]
+      --clipsFile     Path to file to store clips in.
+                         [string] [default: "/home/kevin/.config/cb/clips.json"]
+  -h, --help          Show help                                        [boolean]
 ```
