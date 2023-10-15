@@ -49,8 +49,8 @@ const config = parseConfig();
 
 yargs
   .env("CB")
-  .option("verbose", options.verbose.details("main"))
-  .option("img", options.img.details("main"))
+  .option("verbose", options.verbose.getDetails("main"))
+  .option("img", options.img.getDetails("main"))
   .options({
     e: {
       alias: "editor",
@@ -72,7 +72,6 @@ yargs
     },
   })
 
-  .requiresArg("e")
   .middleware(setFilePath)
   .middleware(debug)
 
@@ -84,7 +83,7 @@ yargs
         describe: "key to associate with clipboard contents",
         default: 0,
       });
-      yargs.option("img", options.img.details("set"));
+      yargs.option("img", options.img.getDetails("set"));
     },
     (argv) => {
       set({ ...argv, content: clipboard.readSync() });
@@ -99,7 +98,7 @@ yargs
         describe: "key to access from data file",
         default: 0,
       });
-      yargs.option("img", options.img.details("get"));
+      yargs.option("img", options.img.getDetails("get"));
     },
     get,
   )
@@ -143,7 +142,7 @@ yargs
   )
   .option("verbose", {
     type: "boolean",
-    describe: options.verbose.details("main"),
+    describe: options.verbose.getDetails("main"),
   })
 
   .command(
@@ -157,12 +156,9 @@ yargs
       });
       yargs.option("verbose", {
         type: "boolean",
-        describe: options.verbose.details("list"),
+        describe: options.verbose.getDetails("list"),
       });
-      yargs.option("img", {
-        type: "boolean",
-        describe: options.img.details("list"),
-      });
+      yargs.option("img", options.img.getDetails("list"));
       yargs.option("pretty", {
         type: "boolean",
         description: "Makes output look nicer, arguably.",
@@ -176,7 +172,7 @@ yargs
     ["open", "o"],
     "Opens clips file in editor.",
     () => {
-      yargs.option("img", options.img.details("open"));
+      yargs.option("img", options.img.getDetails("open"));
     },
     open,
   )

@@ -5,17 +5,13 @@ class Option {
     this._help = help;
   }
 
-  _getHelp(command) {
+  _getDescription(command) {
     return { description: this._help[command] };
   }
 
-  details(command) {
-    let help = this._getHelp(command);
-    if (command === "main") {
-      // This prevents duplication of aliases in subcommands
-      help = { ...help, ...this._settings };
-    }
-    return help;
+  getDetails(command) {
+    let details = this._getDescription(command);
+    return { ...details, ...this._settings };
   }
 }
 
