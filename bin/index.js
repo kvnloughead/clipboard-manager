@@ -16,7 +16,7 @@ import paste from "../commands/paste.js";
 import remove from "../commands/remove.js";
 import list from "../commands/list.js";
 import open from "../commands/open.js";
-import { openFileInEditor, parseJSON, listImages } from "../utils/helpers.js";
+import { parseJSON, listImages } from "../utils/helpers.js";
 import { options } from "../help/index.js";
 import tracker from "../commands/tracker.js";
 
@@ -108,22 +108,6 @@ yargs
       yargs.option("config", options.config.getDetails("remove"));
     },
     remove,
-  )
-
-  .command(
-    ["config [option]", "cfg"],
-    "Sets a configuration option, or opens configuration file if no option is provided",
-    (yargs) => {
-      yargs.positional("option", {
-        describe: "the option to configure",
-      });
-      yargs.option("editor", options.editor.getDetails("config"));
-    },
-    ({ configFile, option, ...rest }) => {
-      option
-        ? set({ ...rest, file: configFile, key: option })
-        : openFileInEditor(rest.editor, configFile);
-    },
   )
 
   .command(
