@@ -50,27 +50,6 @@ const config = parseConfig();
 yargs
   .env("CB")
   .option("verbose", options.verbose.getDetails("main"))
-  .options({
-    e: {
-      alias: "editor",
-      default: process.env.EDITOR || "nano",
-      describe: "Editor to use to open config or data files",
-      type: "string",
-    },
-    c: {
-      alias: ["cfg", "config"],
-      default: false,
-      describe: "Run commands on config file instead of clips.",
-      type: "boolean",
-    },
-    f: {
-      alias: "force",
-      default: false,
-      describe: "Force action",
-      type: "boolean",
-    },
-  })
-
   .middleware(setFilePath)
   .middleware(debug)
 
@@ -83,6 +62,8 @@ yargs
         default: 0,
       });
       yargs.option("img", options.img.getDetails("set"));
+      yargs.option("force", options.force.getDetails("set"));
+      yargs.option("config", options.config.getDetails("set"));
     },
     (argv) => {
       set({ ...argv, content: clipboard.readSync() });
@@ -98,6 +79,7 @@ yargs
         default: 0,
       });
       yargs.option("img", options.img.getDetails("get"));
+      yargs.option("config", options.config.getDetails("get"));
     },
     get,
   )
@@ -110,6 +92,7 @@ yargs
         describe: "key to access from data file",
         default: 0,
       });
+      yargs.option("config", options.config.getDetails("paste"));
     },
     paste,
   )
@@ -121,6 +104,8 @@ yargs
       yargs.positional("key", {
         describe: "key to remove from data",
       });
+      yargs.option("force", options.force.getDetails("remove"));
+      yargs.option("config", options.config.getDetails("remove"));
     },
     remove,
   )
@@ -132,6 +117,7 @@ yargs
       yargs.positional("option", {
         describe: "the option to configure",
       });
+      yargs.option("editor", options.editor.getDetails("config"));
     },
     ({ configFile, option, ...rest }) => {
       option
@@ -139,10 +125,6 @@ yargs
         : openFileInEditor(rest.editor, configFile);
     },
   )
-  .option("verbose", {
-    type: "boolean",
-    describe: options.verbose.getDetails("main"),
-  })
 
   .command(
     ["list [pattern]", "l"],
@@ -153,10 +135,8 @@ yargs
         default: "",
         type: "string",
       });
-      yargs.option("verbose", {
-        type: "boolean",
-        describe: options.verbose.getDetails("list"),
-      });
+      yargs.option("verbose", options.verbose.getDetails("list"));
+      yargs.option("config", options.config.getDetails("list"));
       yargs.option("img", options.img.getDetails("list"));
       yargs.option("pretty", {
         type: "boolean",
@@ -172,6 +152,8 @@ yargs
     "Opens clips file in editor.",
     (yargs) => {
       yargs.option("img", options.img.getDetails("open"));
+      yargs.option("editor", options.editor.getDetails("open"));
+      yargs.option("config", options.config.getDetails("open"));
     },
     open,
   )
