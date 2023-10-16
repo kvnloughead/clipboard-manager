@@ -1,7 +1,10 @@
 import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
-import { openFileInEditor } from "../utils/helpers.js";
+import prompt from "prompt";
+import clipboard from "clipboardy";
+
+import { parseJSON, openFileInEditor } from "../utils/helpers.js";
 
 function tracker(args) {
   // Create directory and file if they don't exist.
@@ -71,7 +74,33 @@ function tracker(args) {
     openFileInEditor(args.editor, args.historyFile);
   }
 
-  const actions = { start, stop, restart, status, open };
+  function list() {
+    const history = parseJSON(args.historyFile);
+    history.forEach((item, i) => {
+      console.log(i, item);
+    });
+    prompt.start();
+    prompt.get(
+      [
+        {
+          name: `entry`,
+          description: `Enter a number to load the clip to clipboard, or type 'q' to quit.`,
+          message: `Please enter a number between 0 and ${history.length}, or 'q' to quit.`,
+          pattern: /[0-9]{1,}|q|quit/i,
+          required: true,
+        },
+      ],
+      (err, result) => {
+        const shouldQuit = ["q", "quit"];
+        if (shouldQuit.includes(result.entry.toLowerCase())) {
+          process.exit(0);
+        }
+        clipboard.writeSync(history[result.entry]);
+      },
+    );
+  }
+
+  const actions = { start, stop, restart, status, open, list };
   actions[args.action]();
 }
 

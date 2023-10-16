@@ -146,7 +146,7 @@ yargs
       yargs.positional("action", {
         describe: "Action to take",
         type: "string",
-        choices: ["start", "status", "stop", "restart", "open"],
+        choices: ["start", "status", "stop", "restart", "open", "list"],
       });
       yargs.option("maxClipHistory", {
         type: "number",
