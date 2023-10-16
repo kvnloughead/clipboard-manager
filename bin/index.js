@@ -25,8 +25,6 @@ for (const [name, option] of Object.entries(options)) {
   defaults[name] = option.getDetails().default;
 }
 
-console.log({ defaults });
-
 function parseConfig() {
   // Grab user specified defaults from file.
   const userDefaults = parseJSON(defaults.defaultsFile);
@@ -143,12 +141,12 @@ yargs
 
   .command(
     ["tracker <action>"],
-    "Check status, start, stop, or restart tracking clipboard history in background.",
+    "Start, stop, restart, or interact with clipboard history tracker.",
     (yargs) => {
       yargs.positional("action", {
         describe: "Action to take",
         type: "string",
-        choices: ["start", "status", "stop", "restart"],
+        choices: ["start", "status", "stop", "restart", "open", "list"],
       });
       yargs.option("maxClipHistory", {
         type: "number",
