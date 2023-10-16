@@ -2,11 +2,12 @@ import clipboardy from "clipboardy";
 import fs from "fs";
 
 import loggers from "./logger.js";
+import { parseJSON } from "./helpers.js";
 const { trackerLogger } = loggers;
 
 const config = JSON.parse(process.argv[2]);
 const HISTORY_PATH = config.historyFile;
-let clipboardHistory = [];
+let clipboardHistory = parseJSON(config.historyFile) || [];
 
 process.on("uncaughtException", (err) => {
   trackerLogger.error("Uncaught Exception:", err);
