@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
+import { openFileInEditor } from "../utils/helpers.js";
 
 function tracker(args) {
   // Create directory and file if they don't exist.
@@ -66,7 +67,11 @@ function tracker(args) {
     }
   }
 
-  const actions = { start, stop, restart, status };
+  function open() {
+    openFileInEditor(args.editor, args.historyFile);
+  }
+
+  const actions = { start, stop, restart, status, open };
   actions[args.action]();
 }
 
