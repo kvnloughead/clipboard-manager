@@ -1,8 +1,0 @@
-- history shouldn't be deleted on stop/restart
-- X add clear command to reset history
-- X add open command to open tracker history
-- update setup script
-- add image support for
-  - paste
-  - rm
-- command to get all configuration (including defaults)
