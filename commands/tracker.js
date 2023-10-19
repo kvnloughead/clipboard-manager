@@ -6,20 +6,32 @@ import clipboard from "clipboardy";
 
 import { parseJSON, openFileInEditor } from "../utils/helpers.js";
 
-function tracker(args) {
-  // Create directory and file if they don't exist.
-  const trackerPidPath = path.join(args.logsPath, "tracker.pid");
-  if (!fs.existsSync(trackerPidPath)) {
-    fs.mkdirSync(args.logsPath, { recursive: true });
-    fs.writeFileSync(trackerPidPath, "");
+class Tracker {
+  constructor(args) {
+    this._logsPath = args.logsPath;
+    this._verbose = args.verbose;
+    this._debug = args.debug;
+    this._editor = args.editor;
+    this._historyFile = args.historyFile;
+    this._args = args;
+
+    // Create directory and file if they don't exist.
+    this._trackerPidPath = path.join(this._logsPath, "tracker.pid");
+    if (!fs.existsSync(this._trackerPidPath)) {
+      fs.mkdirSync(this._logsPath, { recursive: true });
+      fs.writeFileSync(this._trackerPidPath, "");
+    }
+
+    // Path to tracker module.
+    this._trackerPath = new URL(
+      "../utils/tracker.js",
+      import.meta.url,
+    ).pathname;
   }
 
-  function start() {
-    const trackerPath = new URL("../utils/tracker.js", import.meta.url)
-      .pathname;
-
+  start() {
     // Prevent duplicate processes from running.
-    const pid = parseInt(fs.readFileSync(trackerPidPath, "utf-8"));
+    const pid = parseInt(fs.readFileSync(this._trackerPidPath, "utf-8"));
     if (Number.isInteger(pid)) {
       console.log(
         `Process with id ${pid} is already running. \nTry running \`cb tracker stop\` or \`cb tracker restart\` instead.`,
@@ -27,42 +39,47 @@ function tracker(args) {
       return;
     }
 
-    const child = spawn("node", [trackerPath, JSON.stringify(args)], {
-      detached: true,
-      setsid: true,
-      stdio: ["ignore", "inherit", "inherit"],
-    });
+    // Start a new tracker process.
+    const child = spawn(
+      "node",
+      [this._trackerPath, JSON.stringify(this._args)],
+      {
+        detached: true,
+        setsid: true,
+        stdio: ["ignore", "inherit", "inherit"],
+      },
+    );
 
     // Save process pid to file for easy stopping.
-    fs.writeFileSync(trackerPidPath, child.pid.toString());
+    fs.writeFileSync(this._trackerPidPath, child.pid.toString());
 
     console.log("Started tracking clipboard in background.");
     child.unref();
     process.exit(0);
   }
 
-  function stop() {
+  stop() {
     try {
-      const pid = parseInt(fs.readFileSync(trackerPidPath, "utf-8"));
+      const pid = parseInt(fs.readFileSync(this._trackerPidPath, "utf-8"));
       process.kill(pid);
-      fs.writeFileSync(trackerPidPath, "");
-      console.log("Stopped tracking clipboard.");
+      fs.writeFileSync(this._trackerPidPath, "");
+      console.log(`Stopped tracking clipboard.`);
     } catch (err) {
       console.error(`Can't stop tracking clipboard, no process found.`);
-      (args.verbose || args.debug) && console.error(err);
+      (this._verbose || this._debug) && console.error(err);
     }
   }
 
-  function restart() {
-    const pid = parseInt(fs.readFileSync(trackerPidPath, "utf-8"));
+  restart() {
+    const pid = parseInt(fs.readFileSync(this._trackerPidPath, "utf-8"));
     if (Number.isInteger(pid)) {
-      stop();
+      this.stop();
     }
-    start();
+    this.start();
   }
 
-  function status() {
-    const pid = parseInt(fs.readFileSync(trackerPidPath, "utf-8"));
+  status() {
+    const pid = parseInt(fs.readFileSync(this._trackerPidPath, "utf-8"));
     if (Number.isInteger(pid)) {
       console.log(`Tracker is running with process id ${pid}.`);
     } else {
@@ -70,12 +87,12 @@ function tracker(args) {
     }
   }
 
-  function open() {
-    openFileInEditor(args.editor, args.historyFile);
+  open() {
+    openFileInEditor(this._editor, this._historyFile);
   }
 
-  function list(start = 0) {
-    const history = parseJSON(args.historyFile);
+  list(start = 0) {
+    const history = parseJSON(this._historyFile);
     history.slice(start, start + 10).forEach((item, i) => {
       console.log(i + start, item);
     });
@@ -95,16 +112,13 @@ function tracker(args) {
         if (shouldQuit.includes(result.entry.toLowerCase())) {
           process.exit(0);
         } else if (result.entry === "n") {
-          list(start + 10);
+          this.list(start + 10);
         } else {
           clipboard.writeSync(history[result.entry]);
         }
       },
     );
   }
-
-  const actions = { start, stop, restart, status, open, list };
-  actions[args.action]();
 }
 
-export default tracker;
+export default Tracker;

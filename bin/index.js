@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import _yargs from "yargs";
-import path from "path";
 import clipboard from "clipboardy";
 import { hideBin } from "yargs/helpers";
 import * as dotenv from "dotenv";
@@ -18,7 +17,7 @@ import list from "../commands/list.js";
 import open from "../commands/open.js";
 import { parseJSON, listImages } from "../utils/helpers.js";
 import { options } from "../help/index.js";
-import tracker from "../commands/tracker.js";
+import Tracker from "../commands/tracker.js";
 
 let defaults = {};
 for (const [name, option] of Object.entries(options)) {
@@ -36,6 +35,8 @@ function parseConfig() {
   return { ...defaults, ...userDefaults, ...parseJSON(configFile) };
 }
 const config = parseConfig();
+
+const tracker = new Tracker(config);
 
 yargs
   .env("CB")
@@ -140,14 +141,40 @@ yargs
   )
 
   .command(
-    ["tracker <action>"],
+    ["tracker"],
     "Start, stop, restart, or interact with clipboard history tracker.",
     (yargs) => {
-      yargs.positional("action", {
-        describe: "Action to take",
-        type: "string",
-        choices: ["start", "status", "stop", "restart", "open", "list"],
-      });
+      yargs
+        .command(
+          "start",
+          "Starts the clipboard tracking process in the background.",
+          () => tracker.start(),
+        )
+        .command(
+          "stop",
+          "Stops the clipboard tracking background process.",
+          () => tracker.stop(),
+        )
+        .command(
+          "restart",
+          "Restarts the clipboard tracking background process.",
+          () => tracker.restart(),
+        )
+        .command(
+          "status",
+          "Checks status of clipboard tracking background process.",
+          () => tracker.status(),
+        )
+        .command(
+          "open",
+          "Opens the clipboard history file in your chosen editor.",
+          () => tracker.open(),
+        )
+        .command(
+          "list",
+          "Lists recent clipboard history and provides an interface for selecting entries.",
+          () => tracker.list(),
+        );
       yargs.option("maxClipHistory", {
         type: "number",
         describe: "Maximum number of clips to store",
@@ -156,7 +183,6 @@ yargs
       yargs.option("historyFile", options.historyFile.getDetails("tracker"));
       yargs.option("logsPath", options.logsPath.getDetails("tracker"));
     },
-    tracker,
   )
 
   .demandCommand()
