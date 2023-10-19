@@ -74,19 +74,19 @@ function tracker(args) {
     openFileInEditor(args.editor, args.historyFile);
   }
 
-  function list() {
+  function list(start = 0) {
     const history = parseJSON(args.historyFile);
-    history.forEach((item, i) => {
-      console.log(i, item);
+    history.slice(start, start + 10).forEach((item, i) => {
+      console.log(i + start, item);
     });
     prompt.start();
     prompt.get(
       [
         {
           name: `entry`,
-          description: `Enter a number to load the clip to clipboard, or type 'q' to quit.`,
-          message: `Please enter a number between 0 and ${history.length}, or 'q' to quit.`,
-          pattern: /[0-9]{1,}|q|quit/i,
+          description: `Enter a number to load the clip to clipboard. Type 'q' to quit or 'n' to show the next ten clips.`,
+          message: `Please enter a number between 0 and ${history.length}, Type 'q' to quit or 'n' to show the next ten clips.`,
+          pattern: /[0-9]{1,}|q|quit|n/i,
           required: true,
         },
       ],
@@ -94,8 +94,11 @@ function tracker(args) {
         const shouldQuit = ["q", "quit"];
         if (shouldQuit.includes(result.entry.toLowerCase())) {
           process.exit(0);
+        } else if (result.entry === "n") {
+          list(start + 10);
+        } else {
+          clipboard.writeSync(history[result.entry]);
         }
-        clipboard.writeSync(history[result.entry]);
       },
     );
   }
