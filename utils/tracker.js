@@ -1,9 +1,8 @@
 import clipboardy from "clipboardy";
 import fs from "fs";
 
-import loggers from "./logger.js";
+import { trackerLogger } from "./logger.js";
 import { parseJSON } from "./helpers.js";
-const { trackerLogger } = loggers;
 
 const config = JSON.parse(process.argv[2]);
 const HISTORY_PATH = config.historyFile;
