@@ -18,6 +18,7 @@ import open from "../commands/open.js";
 import { parseJSON, listImages } from "../utils/helpers.js";
 import { options } from "../help/index.js";
 import Tracker from "../commands/tracker.js";
+import { appLogger } from "../utils/logger.js";
 
 let defaults = {};
 for (const [name, option] of Object.entries(options)) {
@@ -61,7 +62,15 @@ yargs
       yargs.option("imagesPath", options.imagesPath.getDetails("set"));
     },
     (argv) => {
-      set({ ...argv, content: clipboard.readSync() });
+      appLogger.logCommand();
+      try {
+        set({ ...argv, content: clipboard.readSync() });
+        appLogger.info(`Data set successfully for key: ${argv.key}`);
+      } catch (err) {
+        appLogger.error(
+          `Failed to set data for key: ${argv.key}. \n\tError: ${err.message}`,
+        );
+      }
     },
   )
 
@@ -77,7 +86,19 @@ yargs
       yargs.option("config", options.config.getDetails("get"));
       yargs.option("imagesPath", options.imagesPath.getDetails("get"));
     },
-    get,
+    (argv) => {
+      appLogger.logCommand();
+      try {
+        get(argv);
+        appLogger.info(`Data retrieved successfully for key: ${argv.key}`);
+      } catch (err) {
+        appLogger.error(
+          `Failed to retrieve data for key: ${argv.key}. \nError: ${
+            err.expected ? err.message : err.stack
+          }`,
+        );
+      }
+    },
   )
 
   .command(

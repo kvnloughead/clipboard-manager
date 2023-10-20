@@ -4,7 +4,8 @@ import { exec } from "node:child_process";
 import path from "path";
 
 import { parseJSON } from "../utils/helpers.js";
-import { ERRORS } from "../utils/errors.js";
+import { MissingKeyError, NotFoundError } from "../utils/errors.js";
+import { MESSAGES } from "../utils/messages.js";
 
 function get(args) {
   const { file, imagesPath, key, config } = args;
@@ -14,7 +15,8 @@ function get(args) {
     const data = parseJSON(file);
     const fname = config ? "config" : "clips";
     if (!data[key]) {
-      console.error(ERRORS.MISSING_KEY(key, fname, config));
+      console.error(MESSAGES.MISSING_KEY(key, fname, config));
+      throw new MissingKeyError(`Key ${key} is not found in ${fname}`);
     } else {
       isTTY ? clipboard.writeSync(data[key]) : console.log(data[key]);
     }
@@ -35,7 +37,8 @@ function get(args) {
         },
       );
     } else {
-      console.log("Image not found");
+      console.error("Image not found");
+      throw new NotFoundError("Image not found");
     }
   }
 }

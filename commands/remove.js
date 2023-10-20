@@ -1,7 +1,6 @@
 import fs from "fs";
 
-import { ERRORS } from "../utils/errors.js";
-import { VERBOSE_MESSAGES } from "../utils/messages.js";
+import { MESSAGES } from "../utils/messages.js";
 import { promptForConfirmation } from "../utils/helpers.js";
 
 function deleteClip(data, args) {
@@ -9,7 +8,7 @@ function deleteClip(data, args) {
   const val = data[key];
   delete data[key];
   fs.writeFileSync(file, JSON.stringify(data, null, 2));
-  if (verbose) console.log(VERBOSE_MESSAGES.DELETED(key, val, fname));
+  if (verbose) console.log(MESSAGES.DELETED(key, val, fname));
 }
 
 function remove(args) {
@@ -17,7 +16,7 @@ function remove(args) {
   const data = JSON.parse(fs.readFileSync(file));
   const fname = config ? "config" : "clips";
   if (!data[key]) {
-    console.error(ERRORS.MISSING_KEY(key, fname, config));
+    console.error(MESSAGES.MISSING_KEYcl(key, fname, config));
     return;
   }
   if (force) {
