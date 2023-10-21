@@ -8,7 +8,7 @@ export function openFileInEditor(editor, file) {
   spawn(editor, [file], { stdio: "inherit" });
 }
 
-export function parseJSON(file) {
+export function parseJSON(file, defaultContent = {}) {
   // Check if the file path is valid
   if (typeof file !== "string" || path.isAbsolute(file) === false) {
     throw new Error("Invalid file path provided");
@@ -16,7 +16,7 @@ export function parseJSON(file) {
 
   // If the file doesn't exist, create it with an empty object
   if (!fs.existsSync(file)) {
-    fs.writeFileSync(file, JSON.stringify({}));
+    fs.writeFileSync(file, JSON.stringify(defaultContent));
   } else {
     // If the file exists but is empty, add an empty object to it
     const fileContents = fs.readFileSync(file, "utf8");
