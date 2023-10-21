@@ -59,6 +59,22 @@ const appLogger = createLogger({
   exitOnError: false,
 });
 
+/**
+ * A console logger for user facing logs.
+ * Sends error messages to stderr, all others to stdout.
+ */
+const messager = createLogger({
+  format: format.simple(),
+  transports: [
+    new transports.Console({
+      // Simple format to remove the `error: ` preface in error messages.
+      format: format.printf(({ level, message }) => `${message}`),
+    }),
+  ],
+  // Send error messages to stderr.
+  stderrLevels: ["error"],
+});
+
 appLogger.logCommand = () => {
   appLogger.info(
     `Executing command: \`cb ${process.argv.slice(2).join(" ")}\``,
@@ -69,4 +85,4 @@ appLogger.debug = () => {
   appLogger.add(console);
 };
 
-export { trackerLogger, appLogger };
+export { trackerLogger, appLogger, messager };
