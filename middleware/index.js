@@ -1,3 +1,5 @@
+import { appLogger } from "../utils/logger.js";
+
 export const setFilePath = (argv) => {
   // If argv.config, then commands should be run on the config file instead of
   // clips file. Not fully implemented.
@@ -5,7 +7,7 @@ export const setFilePath = (argv) => {
 };
 
 export const debug = (argv) => {
-  if (argv.verbose) {
-    console.log(argv);
+  if (argv.verbose || argv.debug) {
+    appLogger.debug();
   }
 };

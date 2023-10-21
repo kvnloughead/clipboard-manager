@@ -33,6 +33,21 @@ const trackerLogger = createLogger({
   ],
 });
 
+const console = new transports.Console({
+  format: format.combine(
+    format.colorize(),
+    format.simple(), // Simplified format for console transport
+  ),
+  handleExceptions: true,
+  handleRejections: true,
+});
+
+const file = new transports.File({
+  filename: path.join(logDirectory, `app.log`),
+  handleExceptions: true,
+  handleRejections: true,
+});
+
 const appLogger = createLogger({
   format: format.combine(
     format.timestamp({
@@ -40,21 +55,7 @@ const appLogger = createLogger({
     }),
     format.printf((info) => `${info.timestamp} ${info.level}: ${info.message}`),
   ),
-  transports: [
-    new transports.File({
-      filename: path.join(logDirectory, `app.log`),
-      handleExceptions: true,
-      handleRejections: true,
-    }),
-    new transports.Console({
-      format: format.combine(
-        format.colorize(),
-        format.simple(), // Simplified format for console transport
-      ),
-      handleExceptions: true,
-      handleRejections: true,
-    }),
-  ],
+  transports: [file],
   exitOnError: false,
 });
 
@@ -62,6 +63,10 @@ appLogger.logCommand = () => {
   appLogger.info(
     `Executing command: \`cb ${process.argv.slice(2).join(" ")}\``,
   );
+};
+
+appLogger.debug = () => {
+  appLogger.add(console);
 };
 
 export { trackerLogger, appLogger };
