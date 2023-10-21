@@ -39,27 +39,36 @@ export function filterObj(obj, onConfirm) {
   );
 }
 
-export function promptForConfirmation(
+export async function promptForConfirmation(
   args,
   { userPrompt, onExit = "Operation was canceled by the user.", onConfirm },
 ) {
-  prompt.start();
+  return new Promise((resolve, reject) => {
+    prompt.start();
 
-  prompt.get([{ name: "confirmation", message: userPrompt }], (err, result) => {
-    if (err) {
-      if (err.message !== "canceled" || args.verbose) {
-        console.error("An error occurred:", err);
-      }
-      if (!result) console.log(); // ensure sigint logs newline before message
-      console.log(onExit);
-      return;
-    }
+    prompt.get(
+      [{ name: "confirmation", message: userPrompt }],
+      (err, result) => {
+        if (err) {
+          if (err.message !== "canceled" || args.verbose) {
+            console.error("An error occurred:", err);
+          }
+          // ensure sigint logs newline before message
+          if (!result) console.log();
+          console.log(onExit);
+          reject(err);
+          return;
+        }
 
-    if (result && parseYes(result.confirmation)) {
-      onConfirm();
-    } else {
-      console.log(onExit);
-    }
+        if (result && parseYes(result.confirmation)) {
+          onConfirm();
+          resolve();
+        } else {
+          console.error(onExit);
+          reject(new Error(onExit));
+        }
+      },
+    );
   });
 }
 

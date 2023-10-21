@@ -61,15 +61,17 @@ yargs
       yargs.option("config", options.config.getDetails("set"));
       yargs.option("imagesPath", options.imagesPath.getDetails("set"));
     },
-    (argv) => {
+    async (argv) => {
       appLogger.logCommand();
       try {
-        set({ ...argv, content: clipboard.readSync() });
-        appLogger.info(`Data set successfully for key: ${argv.key}`);
-      } catch (err) {
-        appLogger.error(
-          `Failed to set data for key: ${argv.key}. \n\tError: ${err.message}`,
+        await set({ ...argv, content: clipboard.readSync() });
+        appLogger.info(
+          `${argv.img ? "Image saved" : "Data set"} successfully for key: ${
+            argv.key
+          }`,
         );
+      } catch (err) {
+        appLogger.error(err);
       }
     },
   )
