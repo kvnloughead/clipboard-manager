@@ -7,7 +7,7 @@ export const setFilePath = (argv) => {
 };
 
 export const debug = (argv) => {
-  if (argv.verbose || argv.debug) {
+  if (argv.debug) {
     appLogger.debug();
   }
 };
