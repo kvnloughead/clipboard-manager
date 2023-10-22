@@ -16,7 +16,7 @@ function remove(args) {
   const data = JSON.parse(fs.readFileSync(file));
   const fname = config ? "config" : "clips";
   if (!data[key]) {
-    console.error(MESSAGES.MISSING_KEYcl(key, fname, config));
+    console.error(MESSAGES.MISSING_KEY(key, fname, config));
     return;
   }
   if (force) {
