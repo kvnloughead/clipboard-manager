@@ -19,23 +19,19 @@ import { parseJSON, listImages } from "../utils/helpers.js";
 import { options } from "../help/index.js";
 import Tracker from "../commands/tracker.js";
 import { appLogger } from "../utils/logger.js";
+import ConfigParser from "../utils/config.js";
 
 let defaults = {};
 for (const [name, option] of Object.entries(options)) {
   defaults[name] = option.getDetails().default;
 }
 
-function parseConfig() {
-  // Grab user specified defaults from file.
-  const userDefaults = parseJSON(defaults.defaultsFile);
+const configParser = new ConfigParser(defaults);
+const config = configParser.parseConfig();
 
-  // If a different config file is specified in the defaults, grab that.
-  const configFile = userDefaults.configFile || defaults.configFile;
-
-  // Merge initial config and return. Doesn't include argv.
-  return { ...defaults, ...userDefaults, ...parseJSON(configFile) };
-}
-const config = parseConfig();
+appLogger.info(
+  `Current user configuration (excluding argv):\n${JSON.stringify(config)}`,
+);
 
 const tracker = new Tracker(config);
 
