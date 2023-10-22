@@ -18,6 +18,7 @@ const HELP = `Usage: node setup.js [OPTIONS]
 import prompt from "prompt";
 
 import { createAndWriteToFile } from "./utils/helpers.js";
+import { messager } from "../utils/logger.js";
 
 const args = process.argv.slice(2).map((arg) => arg.toLowerCase());
 const noPrompt = args.some((val) => ["-y", "--y", "y", "yes"].includes(val));
@@ -46,9 +47,9 @@ async function promptUser(err, result) {
     );
   } catch (err) {
     if (verbose) {
-      console.error(err);
+      messager.error(err);
     } else {
-      console.log(
+      messager.info(
         `\nExiting. Run again with the -v flag for more information.\n`,
       );
     }
@@ -59,7 +60,7 @@ async function promptUser(err, result) {
 prompt.start();
 
 if (showHelp) {
-  console.log(HELP);
+  messager.info(HELP);
 } else if (noPrompt) {
   promptUser(null, {
     clipsFile: `/home/${process.env.USER}/.config/cb/clips.json`,

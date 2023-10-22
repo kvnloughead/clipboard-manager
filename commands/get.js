@@ -6,6 +6,7 @@ import path from "path";
 import { parseJSON } from "../utils/helpers.js";
 import { MissingKeyError, NotFoundError } from "../utils/errors.js";
 import { MESSAGES } from "../utils/messages.js";
+import { messager } from "../utils/logger.js";
 
 function get(args) {
   const { file, imagesPath, key, config } = args;
@@ -15,10 +16,10 @@ function get(args) {
     const data = parseJSON(file);
     const fname = config ? "config" : "clips";
     if (!data[key]) {
-      console.error(MESSAGES.MISSING_KEY(key, fname, config));
+      messager.error(MESSAGES.MISSING_KEY(key, fname, config));
       throw new MissingKeyError(`Key ${key} is not found in ${fname}`);
     } else {
-      isTTY ? clipboard.writeSync(data[key]) : console.log(data[key]);
+      isTTY ? clipboard.writeSync(data[key]) : messager.info(data[key]);
     }
   } else {
     const file = path.join(imagesPath, key.toString() + ".png");
@@ -26,18 +27,18 @@ function get(args) {
       // TODO - figure out why oh why this kludge is necessary. I can either
       // get the process to exit, or get it to work. Both at the same time
       // escapes me. So I log this helpful note instead.
-      console.log(`Image loaded to clipboard. Hit Ctrl+C to continue.`);
+      messager.info(`Image loaded to clipboard. Hit Ctrl+C to continue.`);
       exec(
         `cat ${file} | xclip -selection clipboard -t image/png &`,
         (error, stdout, stderr) => {
           if (error || stderr) {
-            console.error({ error });
-            console.error({ stderr });
+            messager.error({ error });
+            messager.error({ stderr });
           }
         },
       );
     } else {
-      console.error("Image not found");
+      messager.error("Image not found");
       throw new NotFoundError("Image not found");
     }
   }

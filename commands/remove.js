@@ -1,6 +1,7 @@
 import fs from "fs";
 
 import { MESSAGES } from "../utils/messages.js";
+import { messager } from "../utils/logger.js";
 import { promptForConfirmation } from "../utils/helpers.js";
 
 function deleteClip(data, args) {
@@ -8,7 +9,7 @@ function deleteClip(data, args) {
   const val = data[key];
   delete data[key];
   fs.writeFileSync(file, JSON.stringify(data, null, 2));
-  if (verbose) console.log(MESSAGES.DELETED(key, val, fname));
+  if (verbose) messager.info(MESSAGES.DELETED(key, val, fname));
 }
 
 function remove(args) {
@@ -16,7 +17,7 @@ function remove(args) {
   const data = JSON.parse(fs.readFileSync(file));
   const fname = config ? "config" : "clips";
   if (!data[key]) {
-    console.error(MESSAGES.MISSING_KEY(key, fname, config));
+    messager.error(MESSAGES.MISSING_KEY(key, fname, config));
     return;
   }
   if (force) {

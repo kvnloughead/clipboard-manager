@@ -3,6 +3,7 @@ import fsPromises from "fs.promises";
 import path from "path";
 import { spawn } from "child_process";
 import prompt from "prompt";
+import { messager } from "../utils/logger.js";
 
 export function openFileInEditor(editor, file) {
   spawn(editor, [file], { stdio: "inherit" });
@@ -51,11 +52,11 @@ export async function promptForConfirmation(
       (err, result) => {
         if (err) {
           if (err.message !== "canceled" || args.verbose) {
-            console.error("An error occurred:", err);
+            messager.error("An error occurred:", err);
           }
           // ensure sigint logs newline before message
-          if (!result) console.log();
-          console.log(onExit);
+          if (!result) messager.info();
+          messager.info(onExit);
           reject(err);
           return;
         }
@@ -64,7 +65,7 @@ export async function promptForConfirmation(
           onConfirm();
           resolve();
         } else {
-          console.error(onExit);
+          messager.error(onExit);
           reject(new Error(onExit));
         }
       },
@@ -126,7 +127,7 @@ export async function createAndWriteToFile(file, contents, options = {}) {
     }
     await fsPromises.writeFile(file, contents);
   } catch (error) {
-    console.error(
+    messager.error(
       `Failed to create and write to file ${file}: ${error.message}`,
     );
     throw error;

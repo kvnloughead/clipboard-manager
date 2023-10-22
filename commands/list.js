@@ -6,6 +6,7 @@ import {
   truncateString,
   filterObj,
 } from "../utils/helpers.js";
+import { messager } from "../utils/logger.js";
 
 function listVerbosely(data, columns, padding) {
   let res = `\n`;
@@ -18,7 +19,7 @@ function listVerbosely(data, columns, padding) {
     val = columns ? truncateString(val, columns / 2, { ellipsis: false }) : val;
     res += `${key}\t${val}\n`;
   });
-  console.log(res + `\n`);
+  messager.info(res + `\n`);
 }
 
 /**
@@ -37,7 +38,7 @@ function list(args) {
   const { file, pretty, verbose, imagesPath, pattern } = args;
 
   if (args.img) {
-    console.log(listImages(imagesPath, pattern).join("\n"));
+    messager.info(listImages(imagesPath, pattern).join("\n"));
     return;
   }
 
@@ -56,7 +57,7 @@ function list(args) {
     listVerbosely(data, columns, maxKeyLength);
   } else {
     Object.entries(data).forEach(([k, v]) => {
-      console.log(k);
+      messager.info(k);
     });
   }
 }

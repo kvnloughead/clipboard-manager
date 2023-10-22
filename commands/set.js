@@ -3,6 +3,7 @@ import { exec } from "node:child_process";
 import path from "path";
 
 import { listImages, promptForConfirmation } from "../utils/helpers.js";
+import { messager } from "../utils/logger.js";
 
 async function setClip(args) {
   return new Promise((resolve, reject) => {
@@ -19,13 +20,14 @@ async function setClip(args) {
           fs.writeFileSync(file, JSON.stringify(data, null, 2));
           resolve();
         } else if (error || stderr) {
+          messager.error(`Failed to save image to key ${key}.`);
           reject(
             new Error(
               `Failed to save image to key ${key}.\n${error}\n${stderr}`,
             ),
           );
         } else {
-          console.log(`Image saved successfully`);
+          messager.info(`Image saved successfully`);
           resolve();
         }
       },

@@ -4,6 +4,7 @@ import path from "path";
 import prompt from "prompt";
 import clipboard from "clipboardy";
 
+import { messager } from "../utils/logger.js";
 import { parseJSON, openFileInEditor } from "../utils/helpers.js";
 
 class Tracker {
@@ -33,7 +34,7 @@ class Tracker {
     // Prevent duplicate processes from running.
     const pid = parseInt(fs.readFileSync(this._trackerPidPath, "utf-8"));
     if (Number.isInteger(pid)) {
-      console.log(
+      messager.info(
         `Process with id ${pid} is already running. \nTry running \`cb tracker stop\` or \`cb tracker restart\` instead.`,
       );
       return;
@@ -53,7 +54,7 @@ class Tracker {
     // Save process pid to file for easy stopping.
     fs.writeFileSync(this._trackerPidPath, child.pid.toString());
 
-    console.log("Started tracking clipboard in background.");
+    messager.info("Started tracking clipboard in background.");
     child.unref();
     process.exit(0);
   }
@@ -63,10 +64,10 @@ class Tracker {
       const pid = parseInt(fs.readFileSync(this._trackerPidPath, "utf-8"));
       process.kill(pid);
       fs.writeFileSync(this._trackerPidPath, "");
-      console.log(`Stopped tracking clipboard.`);
+      messager.info(`Stopped tracking clipboard.`);
     } catch (err) {
-      console.error(`Can't stop tracking clipboard, no process found.`);
-      (this._verbose || this._debug) && console.error(err);
+      messager.error(`Can't stop tracking clipboard, no process found.`);
+      (this._verbose || this._debug) && messager.error(err);
     }
   }
 
@@ -81,9 +82,9 @@ class Tracker {
   status() {
     const pid = parseInt(fs.readFileSync(this._trackerPidPath, "utf-8"));
     if (Number.isInteger(pid)) {
-      console.log(`Tracker is running with process id ${pid}.`);
+      messager.info(`Tracker is running with process id ${pid}.`);
     } else {
-      console.log(`No process is running.`);
+      messager.info(`No process is running.`);
     }
   }
 
@@ -94,7 +95,7 @@ class Tracker {
   list(start = 0) {
     const history = parseJSON(this._historyFile);
     history.slice(start, start + 10).forEach((item, i) => {
-      console.log(i + start, item);
+      messager.info(i + start, item);
     });
     prompt.start();
     prompt.get(
