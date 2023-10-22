@@ -75,10 +75,21 @@ const messager = createLogger({
   stderrLevels: ["error"],
 });
 
-appLogger.logCommand = () => {
+/**
+ * Logs info about the command that was run, including command line arguments.
+ *
+ * @param {object} args - default and user specified configuration
+ * @param {boolean} args.verbose - whether to log verbosely
+ */
+appLogger.logCommand = (args) => {
   appLogger.info(
     `Executing command: \`cb ${process.argv.slice(2).join(" ")}\``,
   );
+  if (args.verbose) {
+    appLogger.info(
+      `Current user configuration (including argv):\n${JSON.stringify(args)}`,
+    );
+  }
 };
 
 appLogger.debug = () => {

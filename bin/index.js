@@ -62,7 +62,7 @@ yargs
       yargs.option("imagesPath", options.imagesPath.getDetails("set"));
     },
     async (argv) => {
-      appLogger.logCommand();
+      appLogger.logCommand(argv);
       try {
         await set({ ...argv, content: clipboard.readSync() });
         appLogger.info(
@@ -89,7 +89,7 @@ yargs
       yargs.option("imagesPath", options.imagesPath.getDetails("get"));
     },
     (argv) => {
-      appLogger.logCommand();
+      appLogger.logCommand(argv);
       try {
         get(argv);
         appLogger.info(`Data retrieved successfully for key: ${argv.key}`);
