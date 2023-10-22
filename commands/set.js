@@ -8,30 +8,33 @@ import { messager } from "../utils/logger.js";
 async function setClip(args) {
   return new Promise((resolve, reject) => {
     const { file, imagesPath, key, content } = args;
-    exec(
-      `xclip -selection clipboard -t image/png -o > ${path.join(
-        imagesPath,
-        key.toString() + ".png",
-      )}`,
-      (error, stdout, stderr) => {
-        if (!args.img && (error || stderr)) {
-          const data = JSON.parse(fs.readFileSync(file));
-          data[key] = content;
-          fs.writeFileSync(file, JSON.stringify(data, null, 2));
-          resolve();
-        } else if (error || stderr) {
-          messager.error(`Failed to save image to key ${key}.`);
-          reject(
-            new Error(
-              `Failed to save image to key ${key}.\n${error}\n${stderr}`,
-            ),
-          );
-        } else {
-          messager.info(`Image saved successfully`);
-          resolve();
-        }
-      },
-    );
+    if (!args.img) {
+      const data = JSON.parse(fs.readFileSync(file));
+      data[key] = content;
+      fs.writeFileSync(file, JSON.stringify(data, null, 2));
+      resolve();
+    } else {
+      const tempPath = path.join(imagesPath, `${key.toString()}_temp.png`);
+      const finalPath = path.join(imagesPath, `${key.toString()}.png`);
+      exec(
+        `xclip -selection clipboard -t image/png -o > ${tempPath}`,
+        (error, stdout, stderr) => {
+          if (error || stderr) {
+            fs.unlinkSync(tempPath); // Delete file if image can't be saved.
+            messager.error(`Failed to save image to key ${key}.`);
+            reject(
+              new Error(
+                `Failed to save image to key ${key}.\n${error}\n${stderr}`,
+              ),
+            );
+          } else {
+            fs.renameSync(tempPath, finalPath);
+            messager.info(`Image saved successfully`);
+            resolve();
+          }
+        },
+      );
+    }
   });
 }
 
