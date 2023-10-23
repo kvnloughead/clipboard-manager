@@ -110,7 +110,19 @@ yargs
       });
       yargs.option("config", options.config.getDetails("paste"));
     },
-    paste,
+    (argv) => {
+      appLogger.logCommand(argv);
+      try {
+        paste(argv);
+        appLogger.info(`Data pasted successfully for key: ${argv.key}`);
+      } catch (err) {
+        appLogger.error(
+          `Failed to paste data for key: ${argv.key}. \nError: ${
+            err.expected ? err.message : err.stack
+          }`,
+        );
+      }
+    },
   )
 
   .command(

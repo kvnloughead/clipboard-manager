@@ -1,6 +1,7 @@
 import { parseJSON } from "../utils/helpers.js";
 import { MESSAGES } from "../utils/messages.js";
 import { messager } from "../utils/logger.js";
+import { MissingKeyError } from "../utils/errors.js";
 
 function paste(args) {
   const { file, key, config } = args;
@@ -9,8 +10,10 @@ function paste(args) {
   const fname = config ? "config" : "clips";
   if (!data[key]) {
     messager.error(MESSAGES.MISSING_KEY(key, fname, config));
+    throw new MissingKeyError();
   } else {
-    messager.info(data[key]);
+    // Paste clip to terminal
+    console.log(data[key]);
   }
 }
 
