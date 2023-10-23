@@ -18,6 +18,18 @@ class NotFoundError extends Error {
   }
 }
 
+/**
+ * Error to throw when canceling an action.
+ */
+class CancelActionError extends Error {
+  constructor(message = "Action canceled", expected = true) {
+    super();
+    this.message = message;
+    this.name = "CancelActionError";
+    this.expected = expected;
+  }
+}
+
 const handleError = (err, args, message) => {
   appLogger.error(
     `${message}. \nError: ${err.expected ? err.message : err.stack}`,
@@ -29,4 +41,4 @@ const handleError = (err, args, message) => {
   }
 };
 
-export { MissingKeyError, NotFoundError, handleError };
+export { MissingKeyError, NotFoundError, CancelActionError, handleError };

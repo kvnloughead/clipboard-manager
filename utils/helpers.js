@@ -4,6 +4,7 @@ import path from "path";
 import { spawn } from "child_process";
 import prompt from "prompt";
 import { messager } from "../utils/logger.js";
+import { CancelActionError } from "./errors.js";
 
 export function openFileInEditor(editor, file) {
   spawn(editor, [file], { stdio: "inherit" });
@@ -66,7 +67,7 @@ export async function promptForConfirmation(
           resolve();
         } else {
           messager.error(onExit);
-          reject(new Error(onExit));
+          reject(new CancelActionError(onExit));
         }
       },
     );
