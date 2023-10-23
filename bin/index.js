@@ -28,10 +28,11 @@ for (const [name, option] of Object.entries(options)) {
 
 const configParser = new ConfigParser(defaults);
 const config = configParser.parseConfig();
-
-appLogger.info(
-  `Current user configuration (excluding argv):\n${JSON.stringify(config)}`,
-);
+if (configParser.configHasChanged(config)) {
+  appLogger.info(
+    `Current user configuration (excluding argv):\n${JSON.stringify(config)}`,
+  );
+}
 
 const tracker = new Tracker(config);
 
