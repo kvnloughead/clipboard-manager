@@ -169,7 +169,19 @@ yargs
         alias: "p",
       });
     },
-    list,
+    (argv) => {
+      appLogger.logCommand(argv);
+      try {
+        list(argv);
+        appLogger.info(`${argv.img ? "Images" : "Clips"} listed`);
+      } catch (err) {
+        appLogger.error(
+          `Failed to list ${argv.img ? "images" : "clips"}. \nError: ${
+            err.expected ? err.message : err.stack
+          }`,
+        );
+      }
+    },
   )
 
   .command(
