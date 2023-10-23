@@ -18,7 +18,7 @@ import open from "../commands/open.js";
 import { parseJSON, listImages } from "../utils/helpers.js";
 import { options } from "../help/index.js";
 import Tracker from "../commands/tracker.js";
-import { appLogger } from "../utils/logger.js";
+import { appLogger, messager } from "../utils/logger.js";
 import ConfigParser from "../utils/config.js";
 
 let defaults = {};
@@ -123,7 +123,19 @@ yargs
       yargs.option("force", options.force.getDetails("remove"));
       yargs.option("config", options.config.getDetails("remove"));
     },
-    remove,
+    async (argv) => {
+      appLogger.logCommand(argv);
+      try {
+        await remove(argv);
+        appLogger.info(`Clip deleted (key: ${argv.key})`);
+      } catch (err) {
+        appLogger.error(
+          `Failed to delete clip (key: ${argv.key}). \nError: ${
+            err.expected ? err.message : err.stack
+          }`,
+        );
+      }
+    },
   )
 
   .command(
