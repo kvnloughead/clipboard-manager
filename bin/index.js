@@ -191,7 +191,25 @@ yargs
       yargs.option("config", options.config.getDetails("open"));
       yargs.option("imagesPath", options.imagesPath.getDetails("open"));
     },
-    open,
+    (argv) => {
+      appLogger.logCommand(argv);
+      try {
+        open(argv);
+        appLogger.info(
+          `Opened ${argv.img ? "images directory" : "clips file"} in ${
+            argv.editor
+          }`,
+        );
+      } catch (err) {
+        handleError(
+          err,
+          argv,
+          `Failed to open ${argv.img ? "images directory" : "clips file"} in ${
+            argv.editor
+          }`,
+        );
+      }
+    },
   )
 
   .command(
