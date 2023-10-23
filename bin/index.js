@@ -20,6 +20,7 @@ import { options } from "../help/index.js";
 import Tracker from "../commands/tracker.js";
 import { appLogger, messager } from "../utils/logger.js";
 import ConfigParser from "../utils/config.js";
+import { handleError } from "../utils/errors.js";
 
 let defaults = {};
 for (const [name, option] of Object.entries(options)) {
@@ -68,7 +69,7 @@ yargs
           }`,
         );
       } catch (err) {
-        appLogger.error(err);
+        handleError(err, argv, `Failed to set clip (key: ${argv.key}).`);
       }
     },
   )
@@ -91,10 +92,10 @@ yargs
         get(argv);
         appLogger.info(`Data retrieved successfully for key: ${argv.key}`);
       } catch (err) {
-        appLogger.error(
-          `Failed to retrieve data for key: ${argv.key}. \nError: ${
-            err.expected ? err.message : err.stack
-          }`,
+        handleError(
+          err,
+          argv,
+          `Failed to retrieve data for (key: ${argv.key}).`,
         );
       }
     },
@@ -121,6 +122,7 @@ yargs
             err.expected ? err.message : err.stack
           }`,
         );
+        handleError(err, argv, `Failed to paste data for key: ${argv.key}.`);
       }
     },
   )
@@ -139,13 +141,9 @@ yargs
       appLogger.logCommand(argv);
       try {
         await remove(argv);
-        appLogger.info(`Clip deleted (key: ${argv.key})`);
+        appLogger.info(`Clip deleted (key: ${argv.key}).`);
       } catch (err) {
-        appLogger.error(
-          `Failed to delete clip (key: ${argv.key}). \nError: ${
-            err.expected ? err.message : err.stack
-          }`,
-        );
+        handleError(err, argv, `Failed to delete clip (key: ${argv.key}).`);
       }
     },
   )
@@ -173,12 +171,12 @@ yargs
       appLogger.logCommand(argv);
       try {
         list(argv);
-        appLogger.info(`${argv.img ? "Images" : "Clips"} listed`);
+        appLogger.info(`${argv.img ? "Images" : "Clips"} listed.`);
       } catch (err) {
-        appLogger.error(
-          `Failed to list ${argv.img ? "images" : "clips"}. \nError: ${
-            err.expected ? err.message : err.stack
-          }`,
+        handleError(
+          err,
+          argv,
+          `Failed to list ${argv.img ? "images" : "clips"}`,
         );
       }
     },
