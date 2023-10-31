@@ -8,7 +8,7 @@ import { parseJSON } from "./helpers.js";
  * The `ConfigParser` class is responsible for parsing user configuration files,
  * managing their hash representations, and detecting changes in configurations
  * across different runs of the application. It helps reduce verbosity by
- * logging configurations only when there are changes.
+ * logging configurations only when there are changes, or after a given period * of time elapses.
  *
  * @class
  * @property {object} _defaults - Initial default configurations.
@@ -16,14 +16,8 @@ import { parseJSON } from "./helpers.js";
  * @property {string} _hashFilePath - Path to the file containing the last saved configuration hash.
  * @property {string} _hash - The current configuration's hash. Used for internal operations.
  *
- * @example
- * const defaults = { defaultsFile: './defaults.json', configFile: './config.json', logsPath: './logs' };
- * const parser = new ConfigParser(defaults);
- * const config = parser.parseConfig();
- * if (parser.configHasChanged(config)) {
- *   console.log('Configuration has changed!');
- * }
- */
+}
+*/
 class ConfigParser {
   constructor(defaults) {
     this._defaults = defaults;
@@ -38,11 +32,57 @@ class ConfigParser {
   }
 
   /**
+   * Returns the last log time from a file.
+   * @returns {number|null} the last log time, or null
+   */
+  _getLastLogTime() {
+    const lastLogFilePath = path.join(this._logsPath, "lastLogTime");
+    try {
+      const lastLogTime = fs.readFileSync(lastLogFilePath, "utf-8");
+      return parseInt(lastLogTime, 10);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /**
+   * Writes the last log time to a file.
+   * @param {date} time the time to set as the last log time
+   */
+  _setLastLogTime(time) {
+    const lastLogFilePath = path.join(this._logsPath, "lastLogTime");
+    fs.writeFileSync(lastLogFilePath, time.toString());
+  }
+
+  /**
+   * Determines whether an interval has passed since the config was last logged
+   * and returns an appropriate message if so.
+   *
+   * @param {object} config the config object to be logged
+   * @param {number} interval the time to elapse between logging. Defaults to 12 hours.
+   * @returns {object|null} an appropriate message to log, or null
+   */
+  intervalHasElapsed(config, interval = 12 * 60 * 60) {
+    const lastLogTime = this._getLastLogTime();
+    const currentTime = Date.now();
+
+    if (lastLogTime === null || currentTime - lastLogTime > interval) {
+      this._setLastLogTime(currentTime);
+      return {
+        message: `Current user configuration (excluding argv):\n${JSON.stringify(
+          config,
+        )}`,
+      };
+    }
+    return null;
+  }
+
+  /**
    * Parses user config before argv is processed. Initial defaults are stored
    * specified in help/index.js, and are passed to the ConfigParser constructor.
    * These are overwritten with user specified config files.
    *
-   * @returns { object } an object containing user configuration.
+   * @returns {object} an object containing user configuration
    */
   parseConfig() {
     const userDefaults = parseJSON(this._defaults.defaultsFile);
@@ -57,16 +97,25 @@ class ConfigParser {
   }
 
   /**
-   * Compares current config to previous config by hash.
+   * Compares current config to previous config by hash. If the config has changed, returns an appropriate message to log.
    *
-   * @param {object} config - the current user config
-   * @returns {boolean} whether the config has changed since previous execution
+   * @param {object} config the config object to be logged
+   * @param {number} interval the time to elapse between logging. Defaults to 12 hours.
+   * @returns {object|null} an appropriate message to log, or null
    */
   configHasChanged(config) {
     const prevHash = this._getPreviousHash();
     const newHash = this._computeConfigHash(config);
     this._saveHashToFile();
-    return prevHash !== newHash;
+    if (prevHash !== newHash) {
+      this._setLastLogTime(Date.now());
+      return {
+        message: `Config has changed. Current config (excluding argv):\n${JSON.stringify(
+          config,
+        )}`,
+      };
+    }
+    return null;
   }
 
   /** Computes hash from config object for use when logging.

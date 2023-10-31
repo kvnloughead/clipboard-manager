@@ -18,21 +18,27 @@ import open from "../commands/open.js";
 import { parseJSON, listImages } from "../utils/helpers.js";
 import { options } from "../help/index.js";
 import Tracker from "../commands/tracker.js";
-import { appLogger, messager } from "../utils/logger.js";
+import { appLogger } from "../utils/logger.js";
 import ConfigParser from "../utils/config.js";
 import { handleError } from "../utils/errors.js";
 
+// Gather default settings
 let defaults = {};
 for (const [name, option] of Object.entries(options)) {
   defaults[name] = option.getDetails().default;
 }
 
+// Merge user config with defaults
 const configParser = new ConfigParser(defaults);
 const config = configParser.parseConfig();
-if (configParser.configHasChanged(config)) {
-  appLogger.info(
-    `Current user configuration (excluding argv):\n${JSON.stringify(config)}`,
-  );
+
+// Log user config periodically, and whenever it changes
+const configHasChanged = configParser.configHasChanged(config);
+if (configHasChanged) {
+  appLogger.info(configHasChanged.message);
+} else {
+  const intervalHasElapsed = configParser.intervalHasElapsed(config);
+  if (intervalHasElapsed) appLogger.info(intervalHasElapsed.message);
 }
 
 const tracker = new Tracker(config);
