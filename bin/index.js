@@ -256,7 +256,7 @@ yargs
       yargs.option("maxClipHistory", {
         type: "number",
         describe: "Maximum number of clips to store",
-        default: 50,
+        default: 100,
       });
       yargs.option("historyFile", options.historyFile.getDetails("tracker"));
       yargs.option("logsPath", options.logsPath.getDetails("tracker"));

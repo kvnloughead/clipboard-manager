@@ -22,13 +22,13 @@ function trackClipboard() {
   setInterval(() => {
     let currentClipboardContent = clipboardy.readSync();
     if (currentClipboardContent !== lastClipboardContent) {
-      clipboardHistory.push(currentClipboardContent);
+      clipboardHistory.unshift(currentClipboardContent);
       trackerLogger.info(
         `Clipboard updated: ${currentClipboardContent.substring(0, 100)}...`,
       );
 
-      if (clipboardHistory.length > (config.maxClipHistory || 50)) {
-        clipboardHistory.shift();
+      if (clipboardHistory.length > config.maxClipHistory) {
+        clipboardHistory = clipboardHistory.slice(0, config.maxClipHistory);
       }
       try {
         fs.writeFileSync(
