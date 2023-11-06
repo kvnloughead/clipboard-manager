@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import prompt from "prompt";
 import clipboard from "clipboardy";
+import chalk from "chalk";
 
 import { messager } from "../utils/logger.js";
 import { parseJSON, openFileInEditor } from "../utils/helpers.js";
@@ -95,7 +96,7 @@ class Tracker {
   list(start = 0) {
     const history = parseJSON(this._historyFile);
     history.slice(start, start + 10).forEach((item, i) => {
-      messager.info(i + start, item);
+      messager.info(chalk.blue.bold(`${i + start}\t`) + item);
     });
     prompt.start();
     prompt.get(

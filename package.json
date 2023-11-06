@@ -26,6 +26,7 @@
     "cb": "./bin/index.js"
   },
   "dependencies": {
+    "chalk": "^5.3.0",
     "clipboardy": "^3.0.0",
     "dotenv": "^16.0.3",
     "find-up": "^6.3.0",
