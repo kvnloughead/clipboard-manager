@@ -21,7 +21,10 @@ function trackClipboard() {
 
   setInterval(() => {
     let currentClipboardContent = clipboardy.readSync();
-    if (currentClipboardContent !== lastClipboardContent) {
+    if (
+      currentClipboardContent &&
+      currentClipboardContent !== lastClipboardContent
+    ) {
       clipboardHistory.unshift(currentClipboardContent);
       trackerLogger.info(
         `Clipboard updated: ${currentClipboardContent.substring(0, 100)}...`,
