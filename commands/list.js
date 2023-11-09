@@ -1,4 +1,5 @@
 import fs from "fs";
+import chalk from "chalk";
 
 import {
   listImages,
@@ -8,16 +9,19 @@ import {
 } from "../utils/helpers.js";
 import { messager } from "../utils/logger.js";
 
-function listVerbosely(data, columns, padding) {
+function listVerbosely(data, columns) {
   let res = `\n`;
-  // const reFiltered = filterObj(JSON.parse(fs.readFileSync(file)), (k, v) => {
-  //   return k.match(pattern) || v.match(pattern);
-  // });
-  Object.entries(data).forEach(([k, v]) => {
-    const key = k.padStart(padding, " ");
+  Object.entries(data).forEach(([k, v], i) => {
+    const key = truncateString(k, (4 * columns) / 5, {
+      ellipsis: false,
+    });
     let val = v.replace(/\n/g, "\\n").trim();
-    val = columns ? truncateString(val, columns / 2, { ellipsis: false }) : val;
-    res += `${key}\t${val}\n`;
+    val = columns
+      ? truncateString(val, (4 * columns) / 5, { ellipsis: false })
+      : val;
+    res += `(${chalk.blue.bold(i)})\tKEY:   ${key}\n\tVALUE: ${chalk.blue(
+      val,
+    )}\n\n`;
   });
   messager.info(res + `\n`);
 }
@@ -37,27 +41,33 @@ function listVerbosely(data, columns, padding) {
 function list(args) {
   const { file, pretty, verbose, imagesPath, pattern } = args;
 
+  // List images
   if (args.img) {
-    messager.info(listImages(imagesPath, pattern).join("\n"));
+    listImages(imagesPath, pattern).forEach((entry, i) => {
+      messager.info(`(${chalk.blue.bold(i)}) ${entry}`);
+    });
     return;
   }
 
+  // Pattern matching
   const data = filterObj(JSON.parse(fs.readFileSync(file)), (k, v) => {
     if (args.verbose) {
       return k.match(pattern) || v.match(pattern);
     }
     return k.match(pattern);
   });
+
   const maxKeyLength = Math.max(...Object.keys(data).map((k) => k.length));
   const { columns } = process.stdout; // when piping, this will be undefined
 
+  // List clips
   if (pretty) {
     printTableFromObject(data, columns, { key: maxKeyLength });
   } else if (verbose) {
     listVerbosely(data, columns, maxKeyLength);
   } else {
-    Object.entries(data).forEach(([k, v]) => {
-      messager.info(k);
+    Object.entries(data).forEach(([k, v], i) => {
+      messager.info(`(${chalk.blue.bold(i)}) ${k}`);
     });
   }
 }

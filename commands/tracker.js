@@ -96,7 +96,9 @@ class Tracker {
   list(start = 0) {
     const history = parseJSON(this._historyFile);
     history.slice(start, start + 10).forEach((item, i) => {
-      messager.info(chalk.blue.bold(`${i + start}\t`) + item.slice(0, 100));
+      messager.info(
+        `(${chalk.blue.bold(`${i + start}`)})\t ${item.slice(0, 100)}`,
+      );
     });
     prompt.start();
     prompt.get(
