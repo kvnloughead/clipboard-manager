@@ -17,6 +17,11 @@ process.on("uncaughtRejection", (reason, promise) => {
 });
 
 function trackClipboard() {
+  function cleanUpJSON(jsonString) {
+    // Remove new lines and replace multiple whitespace/tabs with a single space
+    return jsonString.replace(/\n/g, "").replace(/\s+/g, " ");
+  }
+
   let lastClipboardContent = clipboardy.readSync();
 
   setInterval(() => {
@@ -25,7 +30,7 @@ function trackClipboard() {
       currentClipboardContent &&
       currentClipboardContent !== lastClipboardContent
     ) {
-      clipboardHistory.unshift(currentClipboardContent);
+      clipboardHistory.unshift(cleanUpJSON(currentClipboardContent));
       trackerLogger.info(
         `Clipboard updated: ${currentClipboardContent.substring(0, 100)}...`,
       );
