@@ -1,5 +1,7 @@
 import fs from "fs";
 import chalk from "chalk";
+import prompt from "prompt";
+import clipboard from "clipboardy";
 
 import {
   listImages,
@@ -24,6 +26,38 @@ function listVerbosely(data, columns) {
     )}\n\n`;
   });
   messager.info(res + `\n`);
+}
+
+function promptUser(data, callback, start = 0, count = 10) {
+  prompt.start();
+  prompt.get(
+    [
+      {
+        name: `entry`,
+        description: `Enter a number to load the clip to clipboard. Type 'q' to quit or 'n' to show the next ${count} clips.`,
+        message: `Please enter a number. Type 'q' to quit or 'n' to show the next ${count} clips.`,
+        pattern: /[0-9]{1,}|q|quit|n/i,
+        required: true,
+      },
+    ],
+    (err, result) => {
+      const shouldQuit = ["q", "quit"];
+      if (shouldQuit.includes(result.entry.toLowerCase())) {
+        process.exit(0);
+      } else if (result.entry === "n") {
+        callback(data, start + count, count);
+      } else {
+        clipboard.writeSync(data[result.entry][1]);
+      }
+    },
+  );
+}
+
+function listKeys(data, start, count) {
+  data.slice(start, start + count).forEach(([k, v], i) => {
+    messager.info(`(${chalk.blue.bold(i + start)}) ${k}`);
+  });
+  promptUser(data, listKeys, start, count);
 }
 
 /**
@@ -58,7 +92,9 @@ function list(args) {
   });
 
   const maxKeyLength = Math.max(...Object.keys(data).map((k) => k.length));
-  const { columns } = process.stdout; // when piping, this will be undefined
+
+  // When piping, this will be undefined
+  const { columns, rows } = process.stdout;
 
   // List clips
   if (pretty) {
@@ -66,9 +102,8 @@ function list(args) {
   } else if (verbose) {
     listVerbosely(data, columns, maxKeyLength);
   } else {
-    Object.entries(data).forEach(([k, v], i) => {
-      messager.info(`(${chalk.blue.bold(i)}) ${k}`);
-    });
+    const entries = Object.entries(data);
+    listKeys(entries, 0, Math.floor(((2 / 3) * rows) / 10) * 10);
   }
 }
 
