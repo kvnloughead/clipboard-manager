@@ -11,7 +11,6 @@ import { setFilePath, debug } from "../middleware/index.js";
 
 import set from "../commands/set.js";
 import get from "../commands/get.js";
-import paste from "../commands/paste.js";
 import remove from "../commands/remove.js";
 import list from "../commands/list.js";
 import open from "../commands/open.js";
@@ -103,32 +102,6 @@ yargs
           argv,
           `Failed to retrieve data for (key: ${argv.key}).`,
         );
-      }
-    },
-  )
-
-  .command(
-    ["paste [key]", "p"],
-    "outputs the value cb[key] to stdout. Images aren't",
-    (yargs) => {
-      yargs.positional("key", {
-        describe: "key to access from data file",
-        default: 0,
-      });
-      yargs.option("config", options.config.getDetails("paste"));
-    },
-    (argv) => {
-      appLogger.logCommand(argv);
-      try {
-        paste(argv);
-        appLogger.info(`Data pasted successfully for key: ${argv.key}`);
-      } catch (err) {
-        appLogger.error(
-          `Failed to paste data for key: ${argv.key}. \nError: ${
-            err.expected ? err.message : err.stack
-          }`,
-        );
-        handleError(err, argv, `Failed to paste data for key: ${argv.key}.`);
       }
     },
   )
@@ -269,19 +242,9 @@ yargs
   .alias("h", "help")
   .completion("completion", function (_current, argv, completionFilter, done) {
     if (
-      [
-        "g",
-        "get",
-        "p",
-        "paste",
-        "s",
-        "set",
-        "rm",
-        "remove",
-        "d",
-        "del",
-        "r",
-      ].some((val) => argv._.includes(val))
+      ["g", "get", "s", "set", "rm", "remove", "d", "del", "r"].some((val) =>
+        argv._.includes(val),
+      )
     ) {
       completionFilter((_err, _defaultCompletions) => {
         const keys = argv.img

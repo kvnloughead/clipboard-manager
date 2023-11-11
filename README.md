@@ -30,8 +30,6 @@ On OSX, use `.bash_profile` instead of `.bashrc`.
 ```
   cb set [key]         assigns clipboard contents to data[key]      [aliases: s]
   cb get [key]         loads the value cb[key] to the clipboard     [aliases: g]
-  cb paste [key]       outputs the value cb[key] to stdout. Images aren't
-                                                                    [aliases: p]
   cb remove <key>      deletes the key:value pair       [aliases: rm, r, del, d]
   cb list [pattern]    Outputs list of current clips to the terminal. If the ver
                        bose flag is set, pattern matching checks values as well

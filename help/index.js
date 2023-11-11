@@ -70,7 +70,6 @@ export const options = {
       default: "Run commands on config file instead of clips.",
       set: "Set a setting in the config file from the clipboard.",
       get: "Get a setting from the config file.",
-      paste: "Paste a setting from the config file.",
       remove: "Remove a setting from the config file.",
       list: "List settings in config file.",
       open: "Open config file in editor.",
