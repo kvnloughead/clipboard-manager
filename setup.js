@@ -16,9 +16,10 @@ const HELP = `Usage: node setup.js [OPTIONS]
   `;
 
 import prompt from "prompt";
+import fsPromises from "fs.promises";
 
 import { createAndWriteToFile } from "./utils/helpers.js";
-import { messager } from "../utils/logger.js";
+import { messager } from "./utils/logger.js";
 
 const args = process.argv.slice(2).map((arg) => arg.toLowerCase());
 const noPrompt = args.some((val) => ["-y", "--y", "y", "yes"].includes(val));
@@ -28,12 +29,16 @@ const showHelp = args.some((val) => ["-h", "--help", "help"].includes(val));
 const defaultconfigFile = `/home/${process.env.USER}/.config/cb/defaults.json`;
 
 async function promptUser(err, result) {
-  const [clipsFile, configFile] = [result.clipsFile, result.configFile];
+  const [clipsFile, configFile, imagesPath] = [
+    result.clipsFile,
+    result.configFile,
+    result.imagesPath,
+  ];
   try {
     await createAndWriteToFile(clipsFile, `{}`, { recursive: true });
     await createAndWriteToFile(
       configFile,
-      JSON.stringify({ clipsFile, configFile }, undefined, 2),
+      JSON.stringify({ clipsFile, configFile, imagesPath }, undefined, 2),
       {
         recursive: true,
       },
@@ -45,6 +50,7 @@ async function promptUser(err, result) {
         recursive: true,
       },
     );
+    await fsPromises.mkdir(path.dirname(imagesPath), { recursive: true });
   } catch (err) {
     if (verbose) {
       messager.error(err);
@@ -65,6 +71,7 @@ if (showHelp) {
   promptUser(null, {
     clipsFile: `/home/${process.env.USER}/.config/cb/clips.json`,
     configFile: `/home/${process.env.USER}/.config/cb/settings.json`,
+    imagesPath: `/home/${process.env.USER}/.config/cb/images`,
   });
 } else {
   prompt.get(
@@ -80,6 +87,12 @@ if (showHelp) {
         default: `/home/${process.env.USER}/.config/cb/clips.json`,
         description: `Where would you like to store your clips?`,
         message: `Please enter a valid file path`,
+      },
+      {
+        name: "imagesPath",
+        default: `/home/${process.env.USER}/.config/cb/images`,
+        description: `Where would you like to store your images?`,
+        message: `Please enter a valid path to a directory`,
       },
     ],
     promptUser,

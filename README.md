@@ -2,24 +2,27 @@
 
 A simple key/value focused clipboard manager.
 
-## Installation
+## Installation on Debian/Ubuntu
 
 ```bash
-git clone git clone git@github.com:kvnloughead/clipboard-manager.git cb
+git clone git clone git@github.com:kvnloughead/clipboard-manager.git
 cd cb
 npm install
-npm install -g .
+sudo apt install xsel
+sudo npm install -g .
 node setup.js
 ```
 
 The setup script will prompt you to enter paths for the files where you want to store your clippings and configuration data. For more information, run `node setup.js --help`.
+
+Note that this application uses [clipboardy](https://www.npmjs.com/package/clipboardy), which on Ubuntu/Debian uses `xsel`. Since `xsel` requires an X11 server, if you are connecting to the machine via SSH you will need to use the `-X` flag to enable X11 forwarding.
 
 ## Autocompletion
 
 For autocompletion:
 
 ```bash
-node bin/index.js completion >> ~/.bashrc
+node ./bin/index.js completion >> ~/.bashrc
 source ~/.bashrc
 ```
 
