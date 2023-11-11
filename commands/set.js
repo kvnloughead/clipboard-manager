@@ -2,7 +2,7 @@ import fs from "fs";
 import { exec } from "node:child_process";
 import path from "path";
 
-import { listImages, promptForConfirmation } from "../utils/helpers.js";
+import { lsImages, promptForConfirmation } from "../utils/helpers.js";
 import { messager } from "../utils/logger.js";
 
 async function setClip(args) {
@@ -41,7 +41,7 @@ async function setClip(args) {
 async function set(args) {
   const { file, key, force, imagesPath } = args;
   const data = args.img
-    ? listImages(imagesPath)
+    ? lsImages(imagesPath)
     : JSON.parse(fs.readFileSync(file));
   if (force || (!args.img && !data[key]) || (args.img && !data.includes(key))) {
     await setClip(args);

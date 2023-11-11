@@ -144,6 +144,6 @@ export function ls(dirpath, pattern = "") {
     .map((item) => item.name);
 }
 
-export function listImages(dirpath, pattern = "") {
+export function lsImages(dirpath, pattern = "") {
   return ls(dirpath, pattern).map((fname) => path.parse(fname).name);
 }

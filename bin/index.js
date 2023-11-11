@@ -15,7 +15,7 @@ import paste from "../commands/paste.js";
 import remove from "../commands/remove.js";
 import list from "../commands/list.js";
 import open from "../commands/open.js";
-import { parseJSON, listImages } from "../utils/helpers.js";
+import { parseJSON, lsImages } from "../utils/helpers.js";
 import { options } from "../help/index.js";
 import Tracker from "../commands/tracker.js";
 import { appLogger } from "../utils/logger.js";
@@ -285,7 +285,7 @@ yargs
     ) {
       completionFilter((_err, _defaultCompletions) => {
         const keys = argv.img
-          ? listImages(argv.imagesPath)
+          ? lsImages(argv.imagesPath)
           : Object.keys(parseJSON(argv.clipsFile));
         done(keys);
       });
