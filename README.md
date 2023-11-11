@@ -89,5 +89,4 @@ Options:
                        [string] [default: "/home/kevin/.config/cb/history.json"]
       --logsPath        Path to directory to store logs in.
                                [string] [default: "/home/kevin/.config/cb/logs"]
-
 ```

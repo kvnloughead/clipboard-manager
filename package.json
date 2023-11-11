@@ -5,7 +5,8 @@
   "type": "module",
   "main": "bin/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "gethelp": "cb --help | xclip -sel clipboard",
+    "tracker:gethelp": "cb tracker --help | xclip -sel clipboard"
   },
   "repository": {
     "type": "git",
