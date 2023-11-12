@@ -22,7 +22,7 @@ Note that this application uses [clipboardy](https://www.npmjs.com/package/clipb
 For autocompletion:
 
 ```bash
-node ./bin/index.js completion >> ~/.bashrc
+cb completion >> ~/.bashrc
 source ~/.bashrc
 ```
 
