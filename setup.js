@@ -50,7 +50,7 @@ async function promptUser(err, result) {
         recursive: true,
       },
     );
-    await fsPromises.mkdir(path.dirname(imagesPath), { recursive: true });
+    await fsPromises.mkdir(imagesPath, { recursive: true });
   } catch (err) {
     if (verbose) {
       messager.error(err);
