@@ -13,6 +13,11 @@ import { messager } from "../utils/logger.js";
 import get from "../commands/get.js";
 
 function promptUser(data, onNext, onSelect, start = 0, count = 10) {
+  if (data.length === 0) {
+    messager.error("No matching entries found.");
+    return;
+  }
+
   prompt.start();
   prompt.get(
     [
