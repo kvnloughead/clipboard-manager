@@ -12,6 +12,10 @@ import {
 import { messager } from "../utils/logger.js";
 import get from "../commands/get.js";
 
+function onSelectClip(entry) {
+  clipboard.writeSync(entry[1]);
+}
+
 function promptUser(data, onNext, onSelect, start = 0, count = 10) {
   if (data.length === 0) {
     messager.error("No matching entries found.");
@@ -36,7 +40,7 @@ function promptUser(data, onNext, onSelect, start = 0, count = 10) {
       } else if (result.entry === "n") {
         onNext(data, start + count, count);
       } else {
-        onSelect(data[result.entry][1]);
+        onSelect(data[result.entry]);
       }
     },
   );
@@ -57,14 +61,15 @@ function listVerbosely(data, start, count, columns) {
     )})\tKEY:   ${key}\n\tVALUE: ${chalk.blue(val)}\n\n`;
   });
   messager.info(res + `\n`);
-  promptUser(data, listVerbosely, clipboard.writeSync, start, count);
+  promptUser(data, listVerbosely, onSelectClip, start, count);
 }
 
 function listKeys(data, start, count) {
   data.slice(start, start + count).forEach(([k, v], i) => {
     messager.info(`(${chalk.blue.bold(i + start)}) ${k}`);
   });
-  promptUser(data, listKeys, clipboard.writeSync, start, count);
+  const onSelect = (entry) => clipboard.writeSync(entry[1]);
+  promptUser(data, listKeys, onSelectClip, start, count);
 }
 
 function listImages(data, start, count, args) {
@@ -74,7 +79,7 @@ function listImages(data, start, count, args) {
     .forEach((entry, i) => {
       messager.info(`(${chalk.blue.bold(i + start)}) ${entry}`);
     });
-  const onSelect = (entry) => get({ args, key: entry });
+  const onSelect = (entry) => get({ ...args, key: entry });
   promptUser(data, listImages, onSelect, start, count);
 }
 
@@ -98,7 +103,7 @@ function list(args) {
   // List images
   if (args.img) {
     const entries = lsImages(imagesPath, pattern);
-    listImages(entries, 0, Math.floor(((2 / 3) * rows) / 10) * 10);
+    listImages(entries, 0, Math.floor(((2 / 3) * rows) / 10) * 10, args);
     return;
   }
 
