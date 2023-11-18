@@ -16,6 +16,18 @@ function onSelectClip(entry) {
   clipboard.writeSync(entry[1]);
 }
 
+/**
+ * Calculate number of entries to display, based on available space.
+ *
+ * @param {number} rows - number of rows displayed in stdout.
+ * @param {number} min - minimum number of entries to display.
+ * @param {number} multiplier - factor to multiply with rows. Usually this should be between 0 and 1.
+ * @returns an integer value indicated the number of entries to display.
+ */
+function numberEntries(rows, multiplier = 1, min = 0) {
+  return Math.max(Math.floor(multiplier * rows), min);
+}
+
 function promptUser(data, onNext, onSelect, start = 0, count = 10) {
   if (data.length === 0) {
     messager.error("No matching entries found.");
@@ -103,7 +115,7 @@ function list(args) {
   // List images
   if (args.img) {
     const entries = lsImages(imagesPath, pattern);
-    listImages(entries, 0, Math.floor(((2 / 3) * rows) / 10) * 10, args);
+    listImages(entries, 0, numberEntries(rows, 0.85, 10), args);
     return;
   }
 
@@ -122,9 +134,9 @@ function list(args) {
   if (pretty) {
     printTableFromObject(data, columns, { key: maxKeyLength });
   } else if (verbose) {
-    listVerbosely(entries, 0, Math.floor(((2 / 3) * rows) / 10) * 10, columns);
+    listVerbosely(entries, 0, numberEntries(rows, 0.25, 5), columns);
   } else {
-    listKeys(entries, 0, Math.floor(((2 / 3) * rows) / 10) * 10);
+    listKeys(entries, 0, numberEntries(rows, 0.85, 10));
   }
 }
 
