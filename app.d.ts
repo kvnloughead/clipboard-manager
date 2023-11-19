@@ -17,6 +17,11 @@ declare global {
     logsPath: string;
   }
 
+  interface LogCommandArgs {
+    [key: string]: any;
+    verbose: boolean;
+  }
+
   type BasicCommand = "get" | "set" | "remove" | "list" | "open" | "main";
 }
 

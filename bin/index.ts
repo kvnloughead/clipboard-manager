@@ -67,7 +67,7 @@ yargs
       yargs.option("imagesPath", options.imagesPath.getDetails("set"));
     },
     async (argv) => {
-      appLogger.logCommand(argv);
+      appLogger.logCommand(argv as LogCommandArgs);
       try {
         await set({ ...argv, content: clipboard.readSync() });
         appLogger.info(
@@ -94,7 +94,7 @@ yargs
       yargs.option("imagesPath", options.imagesPath.getDetails("get"));
     },
     (argv) => {
-      appLogger.logCommand(argv);
+      appLogger.logCommand(argv as LogCommandArgs);
       try {
         get(argv);
         appLogger.info(`Data retrieved successfully for key: ${argv.key}`);
@@ -119,7 +119,7 @@ yargs
       yargs.option("config", options.config.getDetails("remove"));
     },
     async (argv) => {
-      appLogger.logCommand(argv);
+      appLogger.logCommand(argv as LogCommandArgs);
       try {
         await remove(argv);
         appLogger.info(`Clip deleted (key: ${argv.key}).`);
@@ -149,7 +149,7 @@ yargs
       });
     },
     (argv) => {
-      appLogger.logCommand(argv);
+      appLogger.logCommand(argv as LogCommandArgs);
       try {
         list(argv);
         appLogger.info(`${argv.img ? "Images" : "Clips"} listed.`);
@@ -173,7 +173,7 @@ yargs
       yargs.option("imagesPath", options.imagesPath.getDetails("open"));
     },
     (argv) => {
-      appLogger.logCommand(argv);
+      appLogger.logCommand(argv as LogCommandArgs);
       try {
         open(argv);
         appLogger.info(
