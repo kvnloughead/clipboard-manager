@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 
-import _yargs from "yargs";
+import _yargs, {
+  FallbackCompletionFunction,
+  CompletionCallback,
+  Arguments,
+} from "yargs";
 import clipboard from "clipboardy";
 import { hideBin } from "yargs/helpers";
 import * as dotenv from "dotenv";
@@ -43,6 +47,42 @@ if (configHasChanged) {
 }
 
 const tracker = new Tracker(config);
+
+/**
+ * A completion function for command line argument processing with yargs.
+ * Pass this funtion to yargs.completions.
+ *
+ * @param _current - the current input string at the command line
+ * @param argv - the parsed command line arguments
+ * @param completionFilter - a function that filters the available completions
+ * @param done - a function that can be called with the final completion options
+ */
+const completionFunction: FallbackCompletionFunction = (
+  _current: string,
+  argv: Arguments,
+  completionFilter: (onCompleted?: CompletionCallback) => any,
+  done: (completions: string[]) => any,
+) => {
+  if (
+    ["g", "get", "s", "set", "rm", "remove", "d", "del", "r"].some((val) =>
+      argv._.includes(val),
+    )
+  ) {
+    completionFilter((_err, _defaultCompletions) => {
+      const keys = argv.img
+        ? lsImages(argv.imagesPath)
+        : Object.keys(parseJSON(argv.clipsFile));
+      done(keys);
+    });
+  } else if (argv._.includes("c") || argv._.includes("cfg")) {
+    completionFilter((_err, _defaultCompletions) => {
+      const configKeys = Object.keys(parseJSON(argv.configFile));
+      done(configKeys);
+    });
+  } else {
+    completionFilter();
+  }
+};
 
 yargs
   .env("CB")
@@ -242,26 +282,6 @@ yargs
   .showHelpOnFail(true)
   .help("h")
   .alias("h", "help")
-  .completion("completion", function (_current, argv, completionFilter, done) {
-    if (
-      ["g", "get", "s", "set", "rm", "remove", "d", "del", "r"].some((val) =>
-        argv._.includes(val),
-      )
-    ) {
-      completionFilter((_err, _defaultCompletions) => {
-        const keys = argv.img
-          ? lsImages(argv.imagesPath)
-          : Object.keys(parseJSON(argv.clipsFile));
-        done(keys);
-      });
-    } else if (argv._.includes("c") || argv._.includes("cfg")) {
-      completionFilter((_err, _defaultCompletions) => {
-        const configKeys = Object.keys(parseJSON(argv.configFile));
-        done(configKeys);
-      });
-    } else {
-      completionFilter();
-    }
-  })
+  .completion("completion", completionFunction)
 
   .config(config).argv;
