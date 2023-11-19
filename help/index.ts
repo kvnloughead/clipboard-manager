@@ -13,7 +13,7 @@ class Option {
     return { description: this._help[command] || this._help.default };
   }
 
-  getDetails(command) {
+  getDetails(command: BasicCommand | null) {
     let details = this._getDescription(command);
     return { ...details, ...this._settings };
   }

@@ -22,10 +22,12 @@ import ConfigParser from "../utils/config.js";
 import { handleError } from "../utils/errors.js";
 
 // Gather default settings
-let defaults = {};
-for (const [name, option] of Object.entries(options)) {
-  defaults[name] = option.getDetails().default;
-}
+const defaults: Options = Object.fromEntries(
+  Object.entries(options).map(([name, option]) => {
+    // defaults[name] = option.getDetails().default;
+    return [name, option.getDetails(null).default];
+  }),
+) as Options;
 
 // Merge user config with defaults
 const configParser = new ConfigParser(defaults);
