@@ -1,5 +1,15 @@
 import path from "path";
+// const userDir = process.env.HOME || process.env.USERPROFILE;
+// const defaultPath = path.join(userDir, ".config", "cb");
+
 const userDir = process.env.HOME || process.env.USERPROFILE;
+if (!userDir) {
+  console.error(
+    "Error: User directory not found. Please ensure that the HOME (Unix-like systems) or USERPROFILE (Windows) environment variable is set.",
+  );
+  process.exit(1);
+}
+
 const defaultPath = path.join(userDir, ".config", "cb");
 
 class Option {
