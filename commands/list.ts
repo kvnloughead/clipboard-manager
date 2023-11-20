@@ -28,30 +28,24 @@ function numberEntries(rows: number, multiplier: number = 1, min: number = 0) {
   return Math.max(Math.floor(multiplier * rows), min);
 }
 
+type ListTextFunction = (
+  data: [string, string][],
+  start?: number,
+  count?: number,
+  columns?: number,
+) => void;
+
+type ListImageFunction = (
+  data: [string, string][],
+  start?: number,
+  count?: number,
+  args?: GetArgs | ListArgs,
+) => void;
+
 function promptUser(
   data: [string, string][],
-  onNext: {
-    (
-      data: [string, string][],
-      start: number,
-      count: number,
-      columns: number,
-    ): void;
-    (data: [string, string][], start?: number, count?: number): void;
-    (
-      data: string[],
-      start: number,
-      count: number,
-      args: GetArgs | ListArgs,
-    ): void;
-    (arg0: string[], arg1: number, arg2: number): void;
-  },
-  onSelect: {
-    (entry: string[]): void;
-    (entry: string[]): void;
-    (entry: string): void;
-    (arg0: any): void;
-  },
+  onNext: ListTextFunction | ListImageFunction,
+  onSelect: (entry: string[]) => void,
   start = 0,
   count = 10,
 ) {
@@ -92,7 +86,7 @@ function listVerbosely(
   data: [string, string][],
   start = 0,
   count = 0,
-  columns: number,
+  columns = 80,
 ) {
   let res = `\n`;
   data.slice(start, start + count).forEach(([k, v], i) => {
@@ -119,19 +113,18 @@ function listKeys(data: [string, string][], start = 0, count = 0) {
 }
 
 function listImages(
-  data: string[],
+  data: [string, string][],
   start = 0,
   count = 0,
   args: GetArgs | ListArgs,
 ) {
-  data
-    .map((entry) => [entry, entry])
-    .slice(start, start + count)
-    .forEach((entry, i) => {
-      messager.info(`(${chalk.blue.bold(i + start)}) ${entry}`);
-    });
-  const onSelect = (entry: string) => get({ ...(args as GetArgs), key: entry });
-  promptUser(data, listImages, onSelect, start, count);
+  data.slice(start, start + count).forEach((entry, i) => {
+    messager.info(`(${chalk.blue.bold(i + start)}) ${entry[0]}`);
+  });
+  const onSelect = (entry: string[]): void => {
+    get({ ...(args as GetArgs), key: entry[0] });
+  };
+  promptUser(data, listImages as ListImageFunction, onSelect, start, count);
 }
 
 /**
@@ -153,7 +146,9 @@ function list(args: ListArgs) {
 
   // List images
   if (args.img) {
-    const entries = lsImages(imagesPath, pattern);
+    const entries: [string, string][] = lsImages(imagesPath, pattern).map(
+      (item) => [item, ""],
+    );
     listImages(entries, 0, numberEntries(rows, 0.85, 10), args);
     return;
   }
