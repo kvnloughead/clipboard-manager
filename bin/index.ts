@@ -135,8 +135,9 @@ yargs
     },
     (argv) => {
       appLogger.logCommand(argv as LogCommandArgs);
+      console.log(argv);
       try {
-        get(argv);
+        get(argv as unknown as GetArgs);
         appLogger.info(`Data retrieved successfully for key: ${argv.key}`);
       } catch (err) {
         handleError(

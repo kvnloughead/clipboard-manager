@@ -8,7 +8,7 @@ import { MissingKeyError, NotFoundError } from "../utils/errors.js";
 import { MESSAGES } from "../utils/messages.js";
 import { messager } from "../utils/logger.js";
 
-function get(args) {
+function get(args: GetArgs) {
   const { file, imagesPath, key, config } = args;
   const isTTY = Boolean(process.stdout.isTTY);
 
