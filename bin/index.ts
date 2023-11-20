@@ -192,7 +192,7 @@ yargs
     (argv) => {
       appLogger.logCommand(argv as LogCommandArgs);
       try {
-        list(argv);
+        list(argv as unknown as ListArgs);
         appLogger.info(`${argv.img ? "Images" : "Clips"} listed.`);
       } catch (err) {
         handleError(

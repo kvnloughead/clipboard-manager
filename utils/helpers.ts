@@ -35,7 +35,10 @@ function parseYes(str) {
   return str && ["yes", "y"].includes(str.toLowerCase());
 }
 
-export function filterObj(obj, onConfirm) {
+export function filterObj(
+  obj: { [s: string]: unknown },
+  onConfirm: (k: string, v: string) => RegExpMatchArray | null,
+) {
   return Object.fromEntries(
     Object.entries(obj).filter(([k, v]) => onConfirm(k, v)),
   );

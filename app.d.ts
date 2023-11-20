@@ -60,6 +60,14 @@ declare global {
     $0: string;
     file: string;
   }
+
+  interface ListArgs extends CommonArgs {
+    file: string;
+    pretty?;
+    boolean;
+    pattern?;
+    string;
+  }
 }
 
 export {};

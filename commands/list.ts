@@ -12,7 +12,7 @@ import {
 import { messager } from "../utils/logger.js";
 import get from "../commands/get.js";
 
-function onSelectClip(entry) {
+function onSelectClip(entry: string[]) {
   clipboard.writeSync(entry[1]);
 }
 
@@ -24,11 +24,37 @@ function onSelectClip(entry) {
  * @param {number} multiplier - factor to multiply with rows. Usually this should be between 0 and 1.
  * @returns an integer value indicated the number of entries to display.
  */
-function numberEntries(rows, multiplier = 1, min = 0) {
+function numberEntries(rows: number, multiplier: number = 1, min: number = 0) {
   return Math.max(Math.floor(multiplier * rows), min);
 }
 
-function promptUser(data, onNext, onSelect, start = 0, count = 10) {
+function promptUser(
+  data: [string, string][],
+  onNext: {
+    (
+      data: [string, string][],
+      start: number,
+      count: number,
+      columns: number,
+    ): void;
+    (data: [string, string][], start?: number, count?: number): void;
+    (
+      data: string[],
+      start: number,
+      count: number,
+      args: GetArgs | ListArgs,
+    ): void;
+    (arg0: string[], arg1: number, arg2: number): void;
+  },
+  onSelect: {
+    (entry: string[]): void;
+    (entry: string[]): void;
+    (entry: string): void;
+    (arg0: any): void;
+  },
+  start = 0,
+  count = 10,
+) {
   if (data.length === 0) {
     messager.error("No matching entries found.");
     return;
@@ -47,18 +73,27 @@ function promptUser(data, onNext, onSelect, start = 0, count = 10) {
     ],
     (err, result) => {
       const shouldQuit = ["q", "quit"];
+      if (typeof result.entry !== "string") {
+        messager.error("Unexpected result.entry type received. Exiting.");
+        process.exit(1);
+      }
       if (shouldQuit.includes(result.entry.toLowerCase())) {
         process.exit(0);
       } else if (result.entry === "n") {
         onNext(data, start + count, count);
       } else {
-        onSelect(data[result.entry]);
+        onSelect(data[Number(result.entry)]);
       }
     },
   );
 }
 
-function listVerbosely(data, start, count, columns) {
+function listVerbosely(
+  data: [string, string][],
+  start = 0,
+  count = 0,
+  columns: number,
+) {
   let res = `\n`;
   data.slice(start, start + count).forEach(([k, v], i) => {
     const key = truncateString(k, (3 * columns) / 4, {
@@ -76,22 +111,26 @@ function listVerbosely(data, start, count, columns) {
   promptUser(data, listVerbosely, onSelectClip, start, count);
 }
 
-function listKeys(data, start, count) {
+function listKeys(data: [string, string][], start = 0, count = 0) {
   data.slice(start, start + count).forEach(([k, v], i) => {
     messager.info(`(${chalk.blue.bold(i + start)}) ${k}`);
   });
-  const onSelect = (entry) => clipboard.writeSync(entry[1]);
   promptUser(data, listKeys, onSelectClip, start, count);
 }
 
-function listImages(data, start, count, args) {
+function listImages(
+  data: string[],
+  start = 0,
+  count = 0,
+  args: GetArgs | ListArgs,
+) {
   data
     .map((entry) => [entry, entry])
     .slice(start, start + count)
     .forEach((entry, i) => {
       messager.info(`(${chalk.blue.bold(i + start)}) ${entry}`);
     });
-  const onSelect = (entry) => get({ ...args, key: entry });
+  const onSelect = (entry: string) => get({ ...(args as GetArgs), key: entry });
   promptUser(data, listImages, onSelect, start, count);
 }
 
@@ -107,7 +146,7 @@ function listImages(data, start, count, args) {
  * @param {string} args.pattern - pattern to match (defaults to empty string)
  *
  */
-function list(args) {
+function list(args: ListArgs) {
   const { file, pretty, verbose, imagesPath, pattern } = args;
 
   const { columns, rows } = process.stdout;
@@ -120,15 +159,18 @@ function list(args) {
   }
 
   // Pattern matching
-  const data = filterObj(JSON.parse(fs.readFileSync(file)), (k, v) => {
-    if (args.verbose) {
-      return k.match(pattern) || v.match(pattern);
-    }
-    return k.match(pattern);
-  });
+  const data = filterObj(
+    JSON.parse(fs.readFileSync(file).toString()),
+    (k: string, v: string) => {
+      if (args.verbose) {
+        return k.match(pattern) || v.match(pattern);
+      }
+      return k.match(pattern);
+    },
+  );
 
   const maxKeyLength = Math.max(...Object.keys(data).map((k) => k.length));
-  const entries = Object.entries(data);
+  const entries = Object.entries(data) as [string, string][];
 
   // List clips
   if (pretty) {
