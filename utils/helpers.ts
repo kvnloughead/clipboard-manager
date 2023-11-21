@@ -139,7 +139,7 @@ export async function createAndWriteToFile(file, contents, options = {}) {
 }
 
 // Returns an array of files that match pattern in dirpath
-export function ls(dirpath, pattern = "") {
+export function ls(dirpath, pattern: RegExp | string = "") {
   return fs
     .readdirSync(dirpath, { withFileTypes: true })
     .filter((item) => !item.isDirectory())
@@ -147,6 +147,6 @@ export function ls(dirpath, pattern = "") {
     .map((item) => item.name);
 }
 
-export function lsImages(dirpath, pattern = "") {
+export function lsImages(dirpath, pattern: RegExp | string = "") {
   return ls(dirpath, pattern).map((fname) => path.parse(fname).name);
 }

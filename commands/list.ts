@@ -140,7 +140,7 @@ function listImages(
  *
  */
 function list(args: ListArgs) {
-  const { file, pretty, verbose, imagesPath, pattern } = args;
+  const { file, pretty, verbose, imagesPath, pattern = "" } = args;
 
   const { columns, rows } = process.stdout;
 

@@ -62,9 +62,8 @@ declare global {
   }
 
   interface ListArgs extends CommonArgs {
-    pretty?;
-    boolean;
-    pattern?;
+    pretty?: boolean;
+    pattern?: string | RegExp;
   }
 }
 
