@@ -161,7 +161,7 @@ yargs
     async (argv) => {
       appLogger.logCommand(argv as LogCommandArgs);
       try {
-        await remove(argv);
+        await remove(argv as unknown as KeyArgs);
         appLogger.info(`Clip deleted (key: ${argv.key}).`);
       } catch (err) {
         handleError(err, argv, `Failed to delete clip (key: ${argv.key}).`);
