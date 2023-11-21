@@ -56,7 +56,7 @@ declare global {
     file: string;
   }
 
-  interface GetArgs extends CommonArgs {
+  interface KeyArgs extends CommonArgs {
     key: number | string;
     $0: string;
   }
