@@ -215,7 +215,7 @@ yargs
     (argv) => {
       appLogger.logCommand(argv as LogCommandArgs);
       try {
-        open(argv);
+        open(argv as unknown as CommonArgs);
         appLogger.info(
           `Opened ${argv.img ? "images directory" : "clips file"} in ${
             argv.editor

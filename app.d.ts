@@ -53,20 +53,18 @@ declare global {
     historyFile: string;
     logsPath: string;
     configPath: string;
+    file: string;
   }
 
   interface GetArgs extends CommonArgs {
     key: number | string;
     $0: string;
-    file: string;
   }
 
   interface ListArgs extends CommonArgs {
-    file: string;
     pretty?;
     boolean;
     pattern?;
-    string;
   }
 }
 
