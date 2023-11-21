@@ -62,6 +62,7 @@ declare global {
     "config-file": string;
     clipsFile: string;
     "clips-file": string;
+    debug?: boolean;
     imagesPath: string;
     "images-path": string;
     historyFile: string;
