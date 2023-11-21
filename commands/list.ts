@@ -39,7 +39,7 @@ type ListImageFunction = (
   data: [string, string][],
   start?: number,
   count?: number,
-  args?: KeyArgs | ListArgs,
+  args?: GetArgs | ListArgs,
 ) => void;
 
 function promptUser(
@@ -116,13 +116,13 @@ function listImages(
   data: [string, string][],
   start = 0,
   count = 0,
-  args: KeyArgs | ListArgs,
+  args: GetArgs | ListArgs,
 ) {
   data.slice(start, start + count).forEach((entry, i) => {
     messager.info(`(${chalk.blue.bold(i + start)}) ${entry[0]}`);
   });
   const onSelect = (entry: string[]): void => {
-    get({ ...(args as KeyArgs), key: entry[0] });
+    get({ ...(args as GetArgs), key: entry[0] });
   };
   promptUser(data, listImages as ListImageFunction, onSelect, start, count);
 }

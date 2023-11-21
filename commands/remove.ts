@@ -5,7 +5,7 @@ import { messager } from "../utils/logger.js";
 import { promptForConfirmation } from "../utils/helpers.js";
 import { MissingKeyError } from "../utils/errors.js";
 
-function deleteClip(data: { [x: string]: any }, args: KeyArgs) {
+function deleteClip(data: { [x: string]: any }, args: GetArgs) {
   const { file, key, verbose } = args;
   const val = data[key];
   delete data[key];
@@ -17,7 +17,7 @@ function deleteClip(data: { [x: string]: any }, args: KeyArgs) {
   }
 }
 
-async function remove(args: KeyArgs) {
+async function remove(args: GetArgs) {
   const { file, key, config, force } = args;
   const data = JSON.parse(fs.readFileSync(file).toString());
   const fname = config ? "config" : "clips";

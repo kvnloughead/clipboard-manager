@@ -108,8 +108,9 @@ yargs
     },
     async (argv) => {
       appLogger.logCommand(argv as LogCommandArgs);
+      const args = { ...argv, content: clipboard.readSync() };
       try {
-        await set({ ...argv, content: clipboard.readSync() });
+        await set(args as unknown as SetArgs);
         appLogger.info(
           `${argv.img ? "Image saved" : "Data set"} successfully for key: ${
             argv.key
@@ -136,7 +137,7 @@ yargs
     (argv) => {
       appLogger.logCommand(argv as LogCommandArgs);
       try {
-        get(argv as unknown as KeyArgs);
+        get(argv as unknown as GetArgs);
         appLogger.info(`Data retrieved successfully for key: ${argv.key}`);
       } catch (err) {
         handleError(
@@ -161,7 +162,7 @@ yargs
     async (argv) => {
       appLogger.logCommand(argv as LogCommandArgs);
       try {
-        await remove(argv as unknown as KeyArgs);
+        await remove(argv as unknown as GetArgs);
         appLogger.info(`Clip deleted (key: ${argv.key}).`);
       } catch (err) {
         handleError(err, argv, `Failed to delete clip (key: ${argv.key}).`);
