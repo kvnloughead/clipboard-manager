@@ -28,10 +28,9 @@ import { handleError } from "../utils/errors.js";
 // Gather default settings
 const defaults: Options = Object.fromEntries(
   Object.entries(options).map(([name, option]) => {
-    // defaults[name] = option.getDetails().default;
-    return [name, option.getDetails(null).default];
+    return [name, option.getDetails("default").default];
   }),
-) as Options;
+) as unknown as Options;
 
 // Merge user config with defaults
 const configParser = new ConfigParser(defaults);

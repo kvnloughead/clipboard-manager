@@ -17,9 +17,14 @@ declare global {
     logsPath: string;
   }
 
-  interface LogCommandArgs {
-    [key: string]: any;
-    verbose: boolean;
+  type Option = keyof Options;
+
+  interface OptionDetails {
+    describe: string;
+    type: string;
+    alias?: string | string[];
+    type: string;
+    default?: any;
   }
 
   type BasicCommand =
@@ -30,6 +35,15 @@ declare global {
     | "open"
     | "main"
     | "tracker";
+
+  type CommandDescriptions = {
+    [K in BasicCommand]?: string;
+  } & { default?: string };
+
+  interface LogCommandArgs {
+    [key: string]: any;
+    verbose: boolean;
+  }
 
   interface CommonArgs {
     _: string[];
