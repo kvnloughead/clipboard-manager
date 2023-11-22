@@ -1,6 +1,18 @@
+import { Arguments } from "yargs";
 import { messager, appLogger } from "./logger.js";
 
-class MissingKeyError extends Error {
+class CustomError extends Error {
+  public expected: boolean;
+  constructor(message?: string, expected = true) {
+    super(message); // 'Error' breaks prototype chain here
+    this.name = "CustomError";
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.expected = expected;
+  }
+}
+
+class MissingKeyError extends CustomError {
+  public expected: boolean;
   constructor(message = "Key not found", expected = true) {
     super();
     this.message = message;
@@ -9,7 +21,8 @@ class MissingKeyError extends Error {
   }
 }
 
-class NotFoundError extends Error {
+class NotFoundError extends CustomError {
+  public expected: boolean;
   constructor(message = "Resource not found", expected = true) {
     super();
     this.message = message;
@@ -21,7 +34,8 @@ class NotFoundError extends Error {
 /**
  * Error to throw when canceling an action.
  */
-class CancelActionError extends Error {
+class CancelActionError extends CustomError {
+  public expected: boolean;
   constructor(message = "Action canceled", expected = true) {
     super();
     this.message = message;
@@ -30,14 +44,25 @@ class CancelActionError extends Error {
   }
 }
 
-const handleError = (err, args, message) => {
-  appLogger.error(
-    `${message}. \nError: ${err.expected ? err.message : err.stack}`,
-  );
-  if (!err.expected && !args.debug) {
+const handleError = (
+  err: CustomError | unknown,
+  args: Arguments,
+  message: string,
+) => {
+  if (err instanceof CustomError) {
+    appLogger.error(
+      `${message}. \nError: ${err.expected ? err.message : err.stack}`,
+    );
+  } else if (!args.debug) {
     messager.error(
       `An unexpected error has occurred. For details, check ${args.logsPath}/app.log or run the command again with the --debug flag set.`,
     );
+  } else if (err instanceof Error && args.debug) {
+    appLogger.error(
+      `${message}. \nError: ${err.stack ? err.message : err.stack}`,
+    );
+  } else if (args.debug) {
+    appLogger.error(`${message}. ${err}`);
   }
 };
 

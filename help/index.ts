@@ -28,7 +28,6 @@ class OptionGenerator {
 
   getDetails(command: BasicCommand | "default") {
     let details = this._getDescription(command);
-    console.log({ ...details, ...this.settings });
     return { ...details, ...this.settings };
   }
 }
