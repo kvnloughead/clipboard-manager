@@ -76,7 +76,7 @@ function promptUser(
       } else if (result.entry === "n") {
         onNext(data, start + count, count);
       } else {
-        onSelect(data[Number(result.entry)]);
+        onSelect(data[Number(result.entry) - 1]);
       }
     },
   );
@@ -98,7 +98,7 @@ function listVerbosely(
       ? truncateString(val, (3 * columns) / 4, { ellipsis: false })
       : val;
     res += `(${chalk.blue.bold(
-      i + start,
+      i + start + 1,
     )})\tKEY:   ${key}\n\tVALUE: ${chalk.blue(val)}\n\n`;
   });
   messager.info(res + `\n`);
@@ -107,7 +107,7 @@ function listVerbosely(
 
 function listKeys(data: [string, string][], start = 0, count = 0) {
   data.slice(start, start + count).forEach(([k, v], i) => {
-    messager.info(`(${chalk.blue.bold(i + start)}) ${k}`);
+    messager.info(`(${chalk.blue.bold(i + start + 1)}) ${k}`);
   });
   promptUser(data, listKeys, onSelectClip, start, count);
 }
@@ -119,7 +119,7 @@ function listImages(
   args: GetArgs | ListArgs,
 ) {
   data.slice(start, start + count).forEach((entry, i) => {
-    messager.info(`(${chalk.blue.bold(i + start)}) ${entry[0]}`);
+    messager.info(`(${chalk.blue.bold(i + start + 1)}) ${entry[0]}`);
   });
   const onSelect = (entry: string[]): void => {
     get({ ...(args as GetArgs), key: entry[0] });

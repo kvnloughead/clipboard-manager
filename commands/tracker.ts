@@ -5,9 +5,8 @@ import prompt from "prompt";
 import clipboard from "clipboardy";
 import chalk from "chalk";
 
-import { appLogger, messager } from "../utils/logger.js";
+import { messager } from "../utils/logger.js";
 import { parseJSON, openFileInEditor } from "../utils/helpers.js";
-import { CustomError } from "../utils/errors.js";
 
 class Tracker {
   private logsPath: string;
@@ -103,7 +102,7 @@ class Tracker {
     const history = parseJSON(this.historyFile);
     history.slice(start, start + 10).forEach((item: string, i: number) => {
       messager.info(
-        `(${chalk.blue.bold(`${i + start}`)})\t ${item.slice(0, 100)}`,
+        `(${chalk.blue.bold(`${i + start + 1}`)})\t ${item.slice(0, 100)}`,
       );
     });
 
@@ -136,7 +135,7 @@ class Tracker {
         } else if (result.entry === "n") {
           this.list(start + 10);
         } else {
-          clipboard.writeSync(history[result.entry]);
+          clipboard.writeSync(history[Number(result.entry) - 1]);
         }
       },
     );
