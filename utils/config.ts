@@ -11,23 +11,29 @@ import { parseJSON } from "./helpers.js";
  * logging configurations only when there are changes, or after a given period * of time elapses.
  *
  * @class
- * @property {object} _defaults - Initial default configurations.
- * @property {string} _logsPath - Path where logs and configuration hashes are stored.
- * @property {string} _hashFilePath - Path to the file containing the last saved configuration hash.
- * @property {string} _hash - The current configuration's hash. Used for internal operations.
+ * @property {object} defaults - Initial default configurations.
+ * @property {string} logsPath - Path where logs and configuration hashes are stored.
+ * @property {string} hashFilePath - Path to the file containing the last saved configuration hash.
+ * @property {string} hash - The current configuration's hash. Used for internal operations.
  *
 }
 */
 class ConfigParser {
-  constructor(defaults) {
-    this._defaults = defaults;
-    this._logsPath = defaults.logsPath;
+  private defaults;
+  private logsPath;
+  private hashFilePath;
+  private hash: string;
+
+  constructor(defaults: Options) {
+    this.hash = "";
+    this.defaults = defaults;
+    this.logsPath = defaults.logsPath;
 
     // Create directory and file to store config hash, if they don't exist.
-    this._hashFilePath = path.join(this._logsPath, "configHash");
-    if (!fs.existsSync(this._hashFilePath)) {
-      fs.mkdirSync(this._logsPath, { recursive: true });
-      fs.writeFileSync(this._hashFilePath, "");
+    this.hashFilePath = path.join(this.logsPath, "configHash");
+    if (!fs.existsSync(this.hashFilePath)) {
+      fs.mkdirSync(this.logsPath, { recursive: true });
+      fs.writeFileSync(this.hashFilePath, "");
     }
   }
 
@@ -36,7 +42,7 @@ class ConfigParser {
    * @returns {number|null} the last log time, or null
    */
   _getLastLogTime() {
-    const lastLogFilePath = path.join(this._logsPath, "lastLogTime");
+    const lastLogFilePath = path.join(this.logsPath, "lastLogTime");
     try {
       const lastLogTime = fs.readFileSync(lastLogFilePath, "utf-8");
       return parseInt(lastLogTime, 10);
@@ -49,8 +55,8 @@ class ConfigParser {
    * Writes the last log time to a file.
    * @param {date} time the time to set as the last log time
    */
-  _setLastLogTime(time) {
-    const lastLogFilePath = path.join(this._logsPath, "lastLogTime");
+  _setLastLogTime(time: number) {
+    const lastLogFilePath = path.join(this.logsPath, "lastLogTime");
     fs.writeFileSync(lastLogFilePath, time.toString());
   }
 
@@ -62,7 +68,7 @@ class ConfigParser {
    * @param {number} interval the time to elapse between logging. Defaults to 12 hours.
    * @returns {object|null} an appropriate message to log, or null
    */
-  intervalHasElapsed(config, interval = 12 * 60 * 60) {
+  intervalHasElapsed(config: Options, interval = 12 * 60 * 60) {
     const lastLogTime = this._getLastLogTime();
     const currentTime = Date.now();
 
@@ -85,10 +91,10 @@ class ConfigParser {
    * @returns {object} an object containing user configuration
    */
   parseConfig() {
-    const userDefaults = parseJSON(this._defaults.defaultsFile);
-    const configFile = userDefaults.configFile || this._defaults.configFile;
+    const userDefaults = parseJSON(this.defaults.defaultsFile);
+    const configFile = userDefaults.configFile || this.defaults.configFile;
     const config = {
-      ...this._defaults,
+      ...this.defaults,
       ...userDefaults,
       ...parseJSON(configFile),
     };
@@ -103,7 +109,7 @@ class ConfigParser {
    * @param {number} interval the time to elapse between logging. Defaults to 12 hours.
    * @returns {object|null} an appropriate message to log, or null
    */
-  configHasChanged(config) {
+  configHasChanged(config: Options) {
     const prevHash = this._getPreviousHash();
     const newHash = this._computeConfigHash(config);
     this._saveHashToFile();
@@ -123,18 +129,18 @@ class ConfigParser {
    *  @param {object} config
    *  @returns {string} the configuration hash
    */
-  _computeConfigHash(config) {
-    this._hash = createHash("md5").update(JSON.stringify(config)).digest("hex");
-    return this._hash;
+  _computeConfigHash(config: Options) {
+    this.hash = createHash("md5").update(JSON.stringify(config)).digest("hex");
+    return this.hash;
   }
 
   _saveHashToFile() {
-    fs.writeFileSync(this._hashFilePath, this._hash);
+    fs.writeFileSync(this.hashFilePath, this.hash);
   }
 
   _getPreviousHash() {
-    if (fs.existsSync(this._hashFilePath)) {
-      return fs.readFileSync(this._hashFilePath, "utf-8");
+    if (fs.existsSync(this.hashFilePath)) {
+      return fs.readFileSync(this.hashFilePath, "utf-8");
     }
     return null;
   }

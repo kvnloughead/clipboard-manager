@@ -17,7 +17,7 @@ process.on("uncaughtRejection", (reason, promise) => {
 });
 
 function trackClipboard() {
-  function cleanUpJSON(jsonString) {
+  function cleanUpJSON(jsonString: string) {
     // Remove new lines and replace multiple whitespace/tabs with a single space
     return jsonString.replace(/\n/g, "").replace(/\s+/g, " ");
   }
@@ -45,8 +45,9 @@ function trackClipboard() {
         );
         trackerLogger.info("Updated clipboard history file.");
       } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
         trackerLogger.error(
-          `Failed to write to history file. Error: ${err.message}`,
+          `Failed to write to history file. Error: ${message}`,
         );
       }
 

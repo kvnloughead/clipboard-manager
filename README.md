@@ -93,3 +93,13 @@ Options:
       --logsPath        Path to directory to store logs in.
                                [string] [default: "/home/kevin/.config/cb/logs"]
 ```
+
+## Usage of scripts
+
+The following scripts are included in package.json.
+
+- `gethelp` - copies the output of `cb --help` to the clipboard, using `xsel`.
+- `tracker:gethelp` - copies the output of `cb tracker --help` to the clipboard, using `xsel`.
+- `build:dev` - builds with `tsc`. The dev build will always mark `dist/bin/index.js` as executable.
+- `build:prod` - builds with `tsc`. The prod build only marks `dist/bind/index.js` as executable if no errors are emitted by `tsc`.
+- `watch` - watches files and rebuilds with `tsc` on change.

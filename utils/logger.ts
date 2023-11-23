@@ -1,7 +1,12 @@
-import { createLogger, format, transports } from "winston";
+import { createLogger, format, transports, Logger } from "winston";
 import os from "os";
 import path from "path";
 import fs from "fs";
+
+interface CustomLogger extends Logger {
+  logCommand: (args: { verbose: boolean; [key: string]: any }) => void;
+  debug: () => Logger;
+}
 
 // Determine log directory based on platform
 let logDirectory;
@@ -57,7 +62,7 @@ const appLogger = createLogger({
   ),
   transports: [file],
   exitOnError: false,
-});
+}) as CustomLogger;
 
 /**
  * A console logger for user facing logs.
@@ -69,10 +74,9 @@ const messager = createLogger({
     new transports.Console({
       // Simple format to remove the `error: ` preface in error messages.
       format: format.printf(({ level, message }) => `${message}`),
+      stderrLevels: ["error"], // Send error messages to stderr.
     }),
   ],
-  // Send error messages to stderr.
-  stderrLevels: ["error"],
 });
 
 /**
@@ -81,7 +85,7 @@ const messager = createLogger({
  * @param {object} args - default and user specified configuration
  * @param {boolean} args.verbose - whether to log verbosely
  */
-appLogger.logCommand = (args) => {
+appLogger.logCommand = (args: LogCommandArgs) => {
   appLogger.info(
     `Executing command: \`cb ${process.argv.slice(2).join(" ")}\``,
   );
@@ -94,6 +98,7 @@ appLogger.logCommand = (args) => {
 
 appLogger.debug = () => {
   appLogger.add(console);
+  return appLogger;
 };
 
 export { trackerLogger, appLogger, messager };

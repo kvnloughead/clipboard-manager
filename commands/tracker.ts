@@ -5,35 +5,42 @@ import prompt from "prompt";
 import clipboard from "clipboardy";
 import chalk from "chalk";
 
-import { messager } from "../utils/logger.js";
+import { appLogger, messager } from "../utils/logger.js";
 import { parseJSON, openFileInEditor } from "../utils/helpers.js";
+import { CustomError } from "../utils/errors.js";
 
 class Tracker {
-  constructor(args) {
-    this._logsPath = args.logsPath;
-    this._verbose = args.verbose;
-    this._debug = args.debug;
-    this._editor = args.editor;
-    this._historyFile = args.historyFile;
-    this._args = args;
+  private logsPath: string;
+  private verbose: boolean;
+  private debug?: boolean;
+  private editor: string;
+  private historyFile: string;
+  private args: CommonArgs;
+  private trackerPidPath: string;
+  private trackerPath: string;
+
+  constructor(args: CommonArgs) {
+    this.logsPath = args.logsPath;
+    this.verbose = args.verbose;
+    this.debug = args.debug;
+    this.editor = args.editor;
+    this.historyFile = args.historyFile;
+    this.args = args;
 
     // Create directory and file if they don't exist.
-    this._trackerPidPath = path.join(this._logsPath, "tracker.pid");
-    if (!fs.existsSync(this._trackerPidPath)) {
-      fs.mkdirSync(this._logsPath, { recursive: true });
-      fs.writeFileSync(this._trackerPidPath, "");
+    this.trackerPidPath = path.join(this.logsPath, "tracker.pid");
+    if (!fs.existsSync(this.trackerPidPath)) {
+      fs.mkdirSync(this.logsPath, { recursive: true });
+      fs.writeFileSync(this.trackerPidPath, "");
     }
 
     // Path to tracker module.
-    this._trackerPath = new URL(
-      "../utils/tracker.js",
-      import.meta.url,
-    ).pathname;
+    this.trackerPath = new URL("../utils/tracker.js", import.meta.url).pathname;
   }
 
   start() {
     // Prevent duplicate processes from running.
-    const pid = parseInt(fs.readFileSync(this._trackerPidPath, "utf-8"));
+    const pid = parseInt(fs.readFileSync(this.trackerPidPath, "utf-8"));
     if (Number.isInteger(pid)) {
       messager.info(
         `Process with id ${pid} is already running. \nTry running \`cb tracker stop\` or \`cb tracker restart\` instead.`,
@@ -42,18 +49,17 @@ class Tracker {
     }
 
     // Start a new tracker process.
-    const child = spawn(
-      "node",
-      [this._trackerPath, JSON.stringify(this._args)],
-      {
-        detached: true,
-        setsid: true,
-        stdio: ["ignore", "inherit", "inherit"],
-      },
-    );
+    const child = spawn("node", [this.trackerPath, JSON.stringify(this.args)], {
+      detached: true,
+      stdio: ["ignore", "inherit", "inherit"],
+    });
 
     // Save process pid to file for easy stopping.
-    fs.writeFileSync(this._trackerPidPath, child.pid.toString());
+    if (child.pid === undefined) {
+      messager.error("Failed to start child process: PID is undefined.");
+      return;
+    }
+    fs.writeFileSync(this.trackerPidPath, child.pid.toString());
 
     messager.info("Started tracking clipboard in background.");
     child.unref();
@@ -62,18 +68,18 @@ class Tracker {
 
   stop() {
     try {
-      const pid = parseInt(fs.readFileSync(this._trackerPidPath, "utf-8"));
+      const pid = parseInt(fs.readFileSync(this.trackerPidPath, "utf-8"));
       process.kill(pid);
-      fs.writeFileSync(this._trackerPidPath, "");
+      fs.writeFileSync(this.trackerPidPath, "");
       messager.info(`Stopped tracking clipboard.`);
     } catch (err) {
       messager.error(`Can't stop tracking clipboard, no process found.`);
-      (this._verbose || this._debug) && messager.error(err);
+      (this.verbose || this.debug) && messager.error(err);
     }
   }
 
   restart() {
-    const pid = parseInt(fs.readFileSync(this._trackerPidPath, "utf-8"));
+    const pid = parseInt(fs.readFileSync(this.trackerPidPath, "utf-8"));
     if (Number.isInteger(pid)) {
       this.stop();
     }
@@ -81,7 +87,7 @@ class Tracker {
   }
 
   status() {
-    const pid = parseInt(fs.readFileSync(this._trackerPidPath, "utf-8"));
+    const pid = parseInt(fs.readFileSync(this.trackerPidPath, "utf-8"));
     if (Number.isInteger(pid)) {
       messager.info(`Tracker is running with process id ${pid}.`);
     } else {
@@ -90,16 +96,17 @@ class Tracker {
   }
 
   open() {
-    openFileInEditor(this._editor, this._historyFile);
+    openFileInEditor(this.editor, this.historyFile);
   }
 
   list(start = 0) {
-    const history = parseJSON(this._historyFile);
-    history.slice(start, start + 10).forEach((item, i) => {
+    const history = parseJSON(this.historyFile);
+    history.slice(start, start + 10).forEach((item: string, i: number) => {
       messager.info(
         `(${chalk.blue.bold(`${i + start}`)})\t ${item.slice(0, 100)}`,
       );
     });
+
     prompt.start();
     prompt.get(
       [
@@ -112,6 +119,17 @@ class Tracker {
         },
       ],
       (err, result) => {
+        if (err) {
+          if (err.message !== "canceled" || this.args.verbose) {
+            messager.error("An error occurred:", err);
+          }
+        }
+
+        if (typeof result.entry !== "string") {
+          messager.info("An unexpected error occurred: result is invalid.");
+          return;
+        }
+
         const shouldQuit = ["q", "quit"];
         if (shouldQuit.includes(result.entry.toLowerCase())) {
           process.exit(0);

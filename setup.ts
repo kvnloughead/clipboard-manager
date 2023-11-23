@@ -16,7 +16,7 @@ const HELP = `Usage: node setup.js [OPTIONS]
   `;
 
 import prompt from "prompt";
-import fsPromises from "fs.promises";
+import fsPromises from "promise-fs";
 
 import { createAndWriteToFile } from "./utils/helpers.js";
 import { messager } from "./utils/logger.js";
@@ -28,7 +28,10 @@ const showHelp = args.some((val) => ["-h", "--help", "help"].includes(val));
 
 const defaultconfigFile = `/home/${process.env.USER}/.config/cb/defaults.json`;
 
-async function promptUser(err, result) {
+async function promptUser(
+  _err: Error | null,
+  result: { clipsFile: string; configFile: string; imagesPath: string },
+) {
   const [clipsFile, configFile, imagesPath] = [
     result.clipsFile,
     result.configFile,

@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 
-import _yargs from "yargs";
+import _yargs, {
+  FallbackCompletionFunction,
+  CompletionCallback,
+  Arguments,
+} from "yargs";
 import clipboard from "clipboardy";
 import { hideBin } from "yargs/helpers";
 import * as dotenv from "dotenv";
@@ -22,10 +26,11 @@ import ConfigParser from "../utils/config.js";
 import { handleError } from "../utils/errors.js";
 
 // Gather default settings
-let defaults = {};
-for (const [name, option] of Object.entries(options)) {
-  defaults[name] = option.getDetails().default;
-}
+const defaults: Options = Object.fromEntries(
+  Object.entries(options).map(([name, option]) => {
+    return [name, option.getDetails("default").default];
+  }),
+) as unknown as Options;
 
 // Merge user config with defaults
 const configParser = new ConfigParser(defaults);
@@ -41,6 +46,42 @@ if (configHasChanged) {
 }
 
 const tracker = new Tracker(config);
+
+/**
+ * A completion function for command line argument processing with yargs.
+ * Pass this funtion to yargs.completions.
+ *
+ * @param _current - the current input string at the command line
+ * @param argv - the parsed command line arguments
+ * @param completionFilter - a function that filters the available completions
+ * @param done - a function that can be called with the final completion options
+ */
+const completionFunction: FallbackCompletionFunction = (
+  _current: string,
+  argv: CommonArgs,
+  completionFilter: (onCompleted?: CompletionCallback) => any,
+  done: (completions: string[]) => any,
+) => {
+  if (
+    ["g", "get", "s", "set", "rm", "remove", "d", "del", "r"].some((val) =>
+      argv._.includes(val),
+    )
+  ) {
+    completionFilter((_err, _defaultCompletions) => {
+      const keys = argv.img
+        ? lsImages(argv.imagesPath)
+        : Object.keys(parseJSON(argv.clipsFile));
+      done(keys);
+    });
+  } else if (argv._.includes("c") || argv._.includes("cfg")) {
+    completionFilter((_err, _defaultCompletions) => {
+      const configKeys = Object.keys(parseJSON(argv.configFile));
+      done(configKeys);
+    });
+  } else {
+    completionFilter();
+  }
+};
 
 yargs
   .env("CB")
@@ -65,9 +106,10 @@ yargs
       yargs.option("imagesPath", options.imagesPath.getDetails("set"));
     },
     async (argv) => {
-      appLogger.logCommand(argv);
+      appLogger.logCommand(argv as LogCommandArgs);
+      const args = { ...argv, content: clipboard.readSync() };
       try {
-        await set({ ...argv, content: clipboard.readSync() });
+        await set(args as unknown as SetArgs);
         appLogger.info(
           `${argv.img ? "Image saved" : "Data set"} successfully for key: ${
             argv.key
@@ -92,9 +134,9 @@ yargs
       yargs.option("imagesPath", options.imagesPath.getDetails("get"));
     },
     (argv) => {
-      appLogger.logCommand(argv);
+      appLogger.logCommand(argv as LogCommandArgs);
       try {
-        get(argv);
+        get(argv as unknown as GetArgs);
         appLogger.info(`Data retrieved successfully for key: ${argv.key}`);
       } catch (err) {
         handleError(
@@ -117,9 +159,9 @@ yargs
       yargs.option("config", options.config.getDetails("remove"));
     },
     async (argv) => {
-      appLogger.logCommand(argv);
+      appLogger.logCommand(argv as LogCommandArgs);
       try {
-        await remove(argv);
+        await remove(argv as unknown as GetArgs);
         appLogger.info(`Clip deleted (key: ${argv.key}).`);
       } catch (err) {
         handleError(err, argv, `Failed to delete clip (key: ${argv.key}).`);
@@ -147,9 +189,9 @@ yargs
       });
     },
     (argv) => {
-      appLogger.logCommand(argv);
+      appLogger.logCommand(argv as LogCommandArgs);
       try {
-        list(argv);
+        list(argv as unknown as ListArgs);
         appLogger.info(`${argv.img ? "Images" : "Clips"} listed.`);
       } catch (err) {
         handleError(
@@ -171,9 +213,9 @@ yargs
       yargs.option("imagesPath", options.imagesPath.getDetails("open"));
     },
     (argv) => {
-      appLogger.logCommand(argv);
+      appLogger.logCommand(argv as LogCommandArgs);
       try {
-        open(argv);
+        open(argv as unknown as CommonArgs);
         appLogger.info(
           `Opened ${argv.img ? "images directory" : "clips file"} in ${
             argv.editor
@@ -240,26 +282,6 @@ yargs
   .showHelpOnFail(true)
   .help("h")
   .alias("h", "help")
-  .completion("completion", function (_current, argv, completionFilter, done) {
-    if (
-      ["g", "get", "s", "set", "rm", "remove", "d", "del", "r"].some((val) =>
-        argv._.includes(val),
-      )
-    ) {
-      completionFilter((_err, _defaultCompletions) => {
-        const keys = argv.img
-          ? lsImages(argv.imagesPath)
-          : Object.keys(parseJSON(argv.clipsFile));
-        done(keys);
-      });
-    } else if (argv._.includes("c") || argv._.includes("cfg")) {
-      completionFilter((_err, _defaultCompletions) => {
-        const configKeys = Object.keys(parseJSON(argv.configFile));
-        done(configKeys);
-      });
-    } else {
-      completionFilter();
-    }
-  })
+  .completion("completion", completionFunction)
 
   .config(config).argv;

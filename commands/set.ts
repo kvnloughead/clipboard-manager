@@ -5,11 +5,11 @@ import path from "path";
 import { lsImages, promptForConfirmation } from "../utils/helpers.js";
 import { messager } from "../utils/logger.js";
 
-async function setClip(args) {
-  return new Promise((resolve, reject) => {
+async function setClip(args: SetArgs) {
+  return new Promise<void>((resolve, reject) => {
     const { file, imagesPath, key, content } = args;
     if (!args.img) {
-      const data = JSON.parse(fs.readFileSync(file));
+      const data = JSON.parse(fs.readFileSync(file).toString());
       data[key] = content;
       fs.writeFileSync(file, JSON.stringify(data, null, 2));
       resolve();
@@ -38,11 +38,11 @@ async function setClip(args) {
   });
 }
 
-async function set(args) {
+async function set(args: SetArgs) {
   const { file, key, force, imagesPath } = args;
   const data = args.img
     ? lsImages(imagesPath)
-    : JSON.parse(fs.readFileSync(file));
+    : JSON.parse(fs.readFileSync(file).toString());
   if (force || (!args.img && !data[key]) || (args.img && !data.includes(key))) {
     await setClip(args);
   } else {

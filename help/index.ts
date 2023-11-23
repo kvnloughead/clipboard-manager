@@ -1,35 +1,48 @@
 import path from "path";
+import { Options } from "yargs";
+
 const userDir = process.env.HOME || process.env.USERPROFILE;
+if (!userDir) {
+  console.error(
+    "Error: User directory not found. Please ensure that the HOME (Unix-like systems) or USERPROFILE (Windows) environment variable is set.",
+  );
+  process.exit(1);
+}
+
 const defaultPath = path.join(userDir, ".config", "cb");
 
-class Option {
-  constructor(name, help, settings) {
+class OptionGenerator {
+  private name: string;
+  private settings;
+  private help: CommandDescriptions;
+
+  constructor(name: Option, help: CommandDescriptions, settings: Options) {
     this.name = name;
-    this._settings = settings;
-    this._help = help;
+    this.settings = settings;
+    this.help = help;
   }
 
-  _getDescription(command) {
-    return { description: this._help[command] || this._help.default };
+  _getDescription(command: BasicCommand | "default") {
+    return { description: this.help[command] || this.help.default };
   }
 
-  getDetails(command) {
+  getDetails(command: BasicCommand | "default") {
     let details = this._getDescription(command);
-    return { ...details, ...this._settings };
+    return { ...details, ...this.settings };
   }
 }
 
 export const options = {
-  verbose: new Option(
+  verbose: new OptionGenerator(
     "verbose",
     {
       default: "Provide verbose logging.",
       list: "Include values in the printed output. When a pattern is supplied along with the -v flag, the pattern matching applies to the values of the clips, not just their keys.",
     },
-    { alias: "v", default: false, type: "boolean" },
+    { alias: "v", default: false, boolean: true },
   ),
 
-  img: new Option(
+  img: new OptionGenerator(
     "img",
     {
       get: "Load image from images directory to clipboard instead of text.",
@@ -37,10 +50,10 @@ export const options = {
       open: "Open the images directory instead of clips file.",
       list: "List images in image directory instead of clips in clips file.",
     },
-    { alias: "i", default: false, type: "boolean" },
+    { alias: "i", default: false, boolean: true },
   ),
 
-  editor: new Option(
+  editor: new OptionGenerator(
     "editor",
     { default: "Editor to use when opening files for editing" },
     {
@@ -50,7 +63,7 @@ export const options = {
     },
   ),
 
-  force: new Option(
+  force: new OptionGenerator(
     "force",
     {
       default: "Force action",
@@ -60,11 +73,11 @@ export const options = {
     {
       alias: "f",
       default: false,
-      type: "boolean",
+      boolean: true,
     },
   ),
 
-  config: new Option(
+  config: new OptionGenerator(
     "config",
     {
       default: "Run commands on config file instead of clips.",
@@ -77,16 +90,16 @@ export const options = {
     {
       alias: ["cfg", "c"],
       default: false,
-      type: "boolean",
+      boolean: true,
     },
   ),
 
-  defaultsFile: new Option(
+  defaultsFile: new OptionGenerator(
     "defaultsFile",
     { default: "Path to file to store user specified default settings in." },
     { default: path.join(defaultPath, "defaults.json"), type: "string" },
   ),
-  configFile: new Option(
+  configFile: new OptionGenerator(
     "configFile",
     {
       default:
@@ -94,24 +107,24 @@ export const options = {
     },
     { default: path.join(defaultPath, "settings.json"), type: "string" },
   ),
-  clipsFile: new Option(
+  clipsFile: new OptionGenerator(
     "clipsFile",
     { default: "Path to file to store clips in." },
     { default: path.join(defaultPath, "clips.json"), type: "string" },
   ),
-  imagesPath: new Option(
+  imagesPath: new OptionGenerator(
     "imagesPath",
     { default: "Path to directory to store images in." },
     { default: path.join(defaultPath, "images"), type: "string" },
   ),
 
-  historyFile: new Option(
+  historyFile: new OptionGenerator(
     "historyFile",
     { tracker: "Path to file where clipboard history should be stored." },
     { default: path.join(defaultPath, "history.json"), type: "string" },
   ),
 
-  logsPath: new Option(
+  logsPath: new OptionGenerator(
     "logsPath",
     { default: "Path to directory to store logs in." },
     { default: path.join(defaultPath, "logs"), type: "string" },

@@ -12,11 +12,43 @@ import {
 import { messager } from "../utils/logger.js";
 import get from "../commands/get.js";
 
-function onSelectClip(entry) {
+function onSelectClip(entry: string[]) {
   clipboard.writeSync(entry[1]);
 }
 
-function promptUser(data, onNext, onSelect, start = 0, count = 10) {
+/**
+ * Calculate number of entries to display, based on available space.
+ *
+ * @param {number} rows - number of rows displayed in stdout.
+ * @param {number} min - minimum number of entries to display.
+ * @param {number} multiplier - factor to multiply with rows. Usually this should be between 0 and 1.
+ * @returns an integer value indicated the number of entries to display.
+ */
+function numberEntries(rows: number, multiplier: number = 1, min: number = 0) {
+  return Math.max(Math.floor(multiplier * rows), min);
+}
+
+type ListTextFunction = (
+  data: [string, string][],
+  start?: number,
+  count?: number,
+  columns?: number,
+) => void;
+
+type ListImageFunction = (
+  data: [string, string][],
+  start?: number,
+  count?: number,
+  args?: GetArgs | ListArgs,
+) => void;
+
+function promptUser(
+  data: [string, string][],
+  onNext: ListTextFunction | ListImageFunction,
+  onSelect: (entry: string[]) => void,
+  start = 0,
+  count = 10,
+) {
   if (data.length === 0) {
     messager.error("No matching entries found.");
     return;
@@ -35,18 +67,27 @@ function promptUser(data, onNext, onSelect, start = 0, count = 10) {
     ],
     (err, result) => {
       const shouldQuit = ["q", "quit"];
+      if (typeof result.entry !== "string") {
+        messager.error("Unexpected result.entry type received. Exiting.");
+        process.exit(1);
+      }
       if (shouldQuit.includes(result.entry.toLowerCase())) {
         process.exit(0);
       } else if (result.entry === "n") {
         onNext(data, start + count, count);
       } else {
-        onSelect(data[result.entry]);
+        onSelect(data[Number(result.entry)]);
       }
     },
   );
 }
 
-function listVerbosely(data, start, count, columns) {
+function listVerbosely(
+  data: [string, string][],
+  start = 0,
+  count = 0,
+  columns = 80,
+) {
   let res = `\n`;
   data.slice(start, start + count).forEach(([k, v], i) => {
     const key = truncateString(k, (3 * columns) / 4, {
@@ -64,23 +105,26 @@ function listVerbosely(data, start, count, columns) {
   promptUser(data, listVerbosely, onSelectClip, start, count);
 }
 
-function listKeys(data, start, count) {
+function listKeys(data: [string, string][], start = 0, count = 0) {
   data.slice(start, start + count).forEach(([k, v], i) => {
     messager.info(`(${chalk.blue.bold(i + start)}) ${k}`);
   });
-  const onSelect = (entry) => clipboard.writeSync(entry[1]);
   promptUser(data, listKeys, onSelectClip, start, count);
 }
 
-function listImages(data, start, count, args) {
-  data
-    .map((entry) => [entry, entry])
-    .slice(start, start + count)
-    .forEach((entry, i) => {
-      messager.info(`(${chalk.blue.bold(i + start)}) ${entry}`);
-    });
-  const onSelect = (entry) => get({ ...args, key: entry });
-  promptUser(data, listImages, onSelect, start, count);
+function listImages(
+  data: [string, string][],
+  start = 0,
+  count = 0,
+  args: GetArgs | ListArgs,
+) {
+  data.slice(start, start + count).forEach((entry, i) => {
+    messager.info(`(${chalk.blue.bold(i + start)}) ${entry[0]}`);
+  });
+  const onSelect = (entry: string[]): void => {
+    get({ ...(args as GetArgs), key: entry[0] });
+  };
+  promptUser(data, listImages as ListImageFunction, onSelect, start, count);
 }
 
 /**
@@ -95,36 +139,41 @@ function listImages(data, start, count, args) {
  * @param {string} args.pattern - pattern to match (defaults to empty string)
  *
  */
-function list(args) {
-  const { file, pretty, verbose, imagesPath, pattern } = args;
+function list(args: ListArgs) {
+  const { file, pretty, verbose, imagesPath, pattern = "" } = args;
 
   const { columns, rows } = process.stdout;
 
   // List images
   if (args.img) {
-    const entries = lsImages(imagesPath, pattern);
-    listImages(entries, 0, Math.floor(((2 / 3) * rows) / 10) * 10, args);
+    const entries: [string, string][] = lsImages(imagesPath, pattern).map(
+      (item) => [item, ""],
+    );
+    listImages(entries, 0, numberEntries(rows, 0.85, 10), args);
     return;
   }
 
   // Pattern matching
-  const data = filterObj(JSON.parse(fs.readFileSync(file)), (k, v) => {
-    if (args.verbose) {
-      return k.match(pattern) || v.match(pattern);
-    }
-    return k.match(pattern);
-  });
+  const data = filterObj(
+    JSON.parse(fs.readFileSync(file).toString()),
+    (k: string, v: string) => {
+      if (args.verbose) {
+        return k.match(pattern) || v.match(pattern);
+      }
+      return k.match(pattern);
+    },
+  );
 
   const maxKeyLength = Math.max(...Object.keys(data).map((k) => k.length));
-  const entries = Object.entries(data);
+  const entries = Object.entries(data) as [string, string][];
 
   // List clips
   if (pretty) {
     printTableFromObject(data, columns, { key: maxKeyLength });
   } else if (verbose) {
-    listVerbosely(entries, 0, Math.floor(((2 / 3) * rows) / 10) * 10, columns);
+    listVerbosely(entries, 0, numberEntries(rows, 0.25, 5), columns);
   } else {
-    listKeys(entries, 0, Math.floor(((2 / 3) * rows) / 10) * 10);
+    listKeys(entries, 0, numberEntries(rows, 0.85, 10));
   }
 }
 
