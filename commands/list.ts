@@ -54,12 +54,18 @@ function promptUser(
     return;
   }
 
+  const showing = Math.min(Math.min(count, data.length), data.length - start);
+  const moreMatches = data.length > start + count;
+
+  let description = `Showing ${showing} of ${data.length} matches. Enter a number to load the clip to clipboard. Type 'q' to quit`;
+  description += moreMatches ? " or 'n' to show more matches." : ".";
+
   prompt.start();
   prompt.get(
     [
       {
         name: `entry`,
-        description: `Enter a number to load the clip to clipboard. Type 'q' to quit or 'n' to show the next ${count} clips.`,
+        description,
         message: `Please enter a number. Type 'q' to quit or 'n' to show the next ${count} clips.`,
         pattern: /[0-9]{1,}|q|quit|n/i,
         required: true,
