@@ -4,7 +4,7 @@ import { messager, appLogger } from "./logger.js";
 class CustomError extends Error {
   public expected: boolean;
   constructor(message?: string, expected = true) {
-    super(message); // 'Error' breaks prototype chain here
+    super(message);
     this.name = "CustomError";
     Object.setPrototypeOf(this, new.target.prototype);
     this.expected = expected;
@@ -66,4 +66,10 @@ const handleError = (
   }
 };
 
-export { MissingKeyError, NotFoundError, CancelActionError, handleError };
+export {
+  MissingKeyError,
+  NotFoundError,
+  CancelActionError,
+  CustomError,
+  handleError,
+};

@@ -62,18 +62,10 @@ export async function promptForConfirmation(
           if (err.message !== "canceled" || args.verbose) {
             messager.error("An error occurred:", err);
           }
-
-          // Handle sigint
-          if (!result) {
-            messager.info("");
-            messager.info(onExit);
-            reject(err);
-            return;
-          }
         }
 
         if (typeof result.confirmation !== "string") {
-          messager.info(onExit);
+          messager.error("An unexpected error occurred: result is invalid.");
           reject(err);
           return;
         }
