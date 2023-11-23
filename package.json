@@ -30,11 +30,12 @@
     "cb": "./dist/bin/index.js"
   },
   "dependencies": {
+    "@types/promise-fs": "^2.1.5",
     "chalk": "^5.3.0",
     "clipboardy": "^3.0.0",
     "dotenv": "^16.0.3",
     "find-up": "^6.3.0",
-    "fs.promises": "^0.1.2",
+    "promise-fs": "^2.1.1",
     "prompt": "^1.3.0",
     "winston": "^3.11.0",
     "yargs": "^17.6.2"

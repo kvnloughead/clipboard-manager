@@ -1,16 +1,16 @@
 import fs from "fs";
-import fsPromises from "fs.promises";
+import fsPromises from "promise-fs";
 import path from "path";
 import { spawn } from "child_process";
 import prompt from "prompt";
 import { messager } from "../utils/logger.js";
 import { CancelActionError } from "./errors.js";
 
-export function openFileInEditor(editor, file) {
+export function openFileInEditor(editor: string, file: string) {
   spawn(editor, [file], { stdio: "inherit" });
 }
 
-export function parseJSON(file, defaultContent = {}) {
+export function parseJSON(file: string, defaultContent = {}) {
   // Check if the file path is valid
   if (typeof file !== "string" || path.isAbsolute(file) === false) {
     throw new Error("Invalid file path provided");
@@ -31,12 +31,12 @@ export function parseJSON(file, defaultContent = {}) {
   return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 
-function parseYes(str) {
+function parseYes(str: string) {
   return str && ["yes", "y"].includes(str.toLowerCase());
 }
 
 export function filterObj(
-  obj: { [s: string]: unknown },
+  obj: { [s: string]: string },
   onConfirm: (k: string, v: string) => RegExpMatchArray | null,
 ) {
   return Object.fromEntries(
@@ -45,8 +45,12 @@ export function filterObj(
 }
 
 export async function promptForConfirmation(
-  args,
-  { userPrompt, onExit = "Operation was canceled by the user.", onConfirm },
+  args: CommonArgs,
+  {
+    userPrompt,
+    onExit = "Operation was canceled by the user.",
+    onConfirm,
+  }: { userPrompt: string; onExit: string; onConfirm: () => unknown },
 ) {
   return new Promise((resolve, reject) => {
     prompt.start();
@@ -58,8 +62,17 @@ export async function promptForConfirmation(
           if (err.message !== "canceled" || args.verbose) {
             messager.error("An error occurred:", err);
           }
-          // ensure sigint logs newline before message
-          if (!result) messager.info();
+
+          // Handle sigint
+          if (!result) {
+            messager.info("");
+            messager.info(onExit);
+            reject(err);
+            return;
+          }
+        }
+
+        if (typeof result.confirmation !== "string") {
           messager.info(onExit);
           reject(err);
           return;
@@ -67,7 +80,7 @@ export async function promptForConfirmation(
 
         if (result && parseYes(result.confirmation)) {
           onConfirm();
-          resolve();
+          resolve(null);
         } else {
           messager.error(onExit);
           reject(new CancelActionError(onExit));
@@ -85,7 +98,11 @@ export async function promptForConfirmation(
  * @param {boolean} [options.ellipsis=true] - whether to append an ellipsis
  * @returns the truncated string
  */
-export function truncateString(s, length, { ellipsis = true }) {
+export function truncateString(
+  s: string,
+  length: number,
+  { ellipsis = true }: { ellipsis?: boolean },
+) {
   if (ellipsis) {
     return s.length < length ? s : s.substring(0, length - 3) + "...";
   }
@@ -101,7 +118,11 @@ export function truncateString(s, length, { ellipsis = true }) {
  * @param {{ key: String, val: String }} padding - a hack to justify the columns. Has not proven useful with the value column.
  *
  */
-export function printTableFromObject(obj, width, padding) {
+export function printTableFromObject(
+  obj: { [s: string]: string },
+  width: number,
+  padding: { key: any; val?: any },
+) {
   const columns = Object.fromEntries(
     Object.entries(obj).map(([k, v]) => {
       const key = padding.key ? k.padStart(padding.key, " ") : k;
@@ -122,7 +143,11 @@ export function printTableFromObject(obj, width, padding) {
  * @param {object} options
  * @param {boolean} options.recursive - if true, create necessary directories
  */
-export async function createAndWriteToFile(file, contents, options = {}) {
+export async function createAndWriteToFile(
+  file: string,
+  contents: string,
+  options: { recursive: boolean },
+) {
   const { recursive = false } = options;
 
   try {
@@ -131,15 +156,15 @@ export async function createAndWriteToFile(file, contents, options = {}) {
     }
     await fsPromises.writeFile(file, contents);
   } catch (error) {
-    messager.error(
-      `Failed to create and write to file ${file}: ${error.message}`,
-    );
+    const message = error instanceof Error ? error.message : error;
+    messager.error(`Failed to create and write to file ${file}: ${message}`);
+
     throw error;
   }
 }
 
 // Returns an array of files that match pattern in dirpath
-export function ls(dirpath, pattern: RegExp | string = "") {
+export function ls(dirpath: fs.PathLike, pattern: RegExp | string = "") {
   return fs
     .readdirSync(dirpath, { withFileTypes: true })
     .filter((item) => !item.isDirectory())
@@ -147,6 +172,6 @@ export function ls(dirpath, pattern: RegExp | string = "") {
     .map((item) => item.name);
 }
 
-export function lsImages(dirpath, pattern: RegExp | string = "") {
+export function lsImages(dirpath: fs.PathLike, pattern: RegExp | string = "") {
   return ls(dirpath, pattern).map((fname) => path.parse(fname).name);
 }
