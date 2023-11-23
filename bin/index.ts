@@ -58,7 +58,7 @@ const tracker = new Tracker(config);
  */
 const completionFunction: FallbackCompletionFunction = (
   _current: string,
-  argv: Arguments,
+  argv: CommonArgs,
   completionFilter: (onCompleted?: CompletionCallback) => any,
   done: (completions: string[]) => any,
 ) => {
