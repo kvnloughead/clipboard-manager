@@ -1,10 +1,6 @@
 #!/usr/bin/env node
 
-import _yargs, {
-  FallbackCompletionFunction,
-  CompletionCallback,
-  Arguments,
-} from "yargs";
+import _yargs, { FallbackCompletionFunction, CompletionCallback } from "yargs";
 import clipboard from "clipboardy";
 import { hideBin } from "yargs/helpers";
 import * as dotenv from "dotenv";
@@ -62,8 +58,8 @@ const completionFunction: FallbackCompletionFunction = (
   done: (completions: string[]) => any,
 ) => {
   if (
-    ["g", "get", "s", "set", "rm", "remove", "d", "del", "r"].some((val) =>
-      argv._.includes(val),
+    ["g", "get", "s", "set", "rm", "remove", "d", "del", "mv", "rename"].some(
+      (val) => argv._.includes(val),
     )
   ) {
     completionFilter((_err, _defaultCompletions) => {
