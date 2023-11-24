@@ -45,6 +45,7 @@ export const options = {
   img: new OptionGenerator(
     "img",
     {
+      default: "Run command on image files instead of text clips.",
       get: "Load image from images directory to clipboard instead of text.",
       set: "Save image from clipboard to a file in images directory.",
       open: "Open the images directory instead of clips file.",
@@ -120,7 +121,7 @@ export const options = {
 
   historyFile: new OptionGenerator(
     "historyFile",
-    { tracker: "Path to file where clipboard history should be stored." },
+    { default: "Path to file where clipboard history should be stored." },
     { default: path.join(defaultPath, "history.json"), type: "string" },
   ),
 
