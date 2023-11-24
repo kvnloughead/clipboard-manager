@@ -72,6 +72,16 @@ function promptUser(
       },
     ],
     (err, result) => {
+      if (err) {
+        if (err.message.match("canceled|cancelled")) {
+          // handle sigint
+          messager.info("\nAction cancelled by user.");
+        } else {
+          console.error(err); // messager fails to log the stack
+        }
+        process.exit(1);
+      }
+
       const shouldQuit = ["q", "quit"];
       if (typeof result.entry !== "string") {
         messager.error("Unexpected result.entry type received. Exiting.");

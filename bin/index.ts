@@ -46,8 +46,6 @@ if (configHasChanged) {
   if (intervalHasElapsed) appLogger.info(intervalHasElapsed.message);
 }
 
-const tracker = new Tracker(config);
-
 /**
  * A completion function for command line argument processing with yargs.
  * Pass this funtion to yargs.completions.
@@ -270,6 +268,7 @@ yargs
     ["tracker"],
     "Start, stop, restart, or interact with clipboard history tracker.",
     (yargs) => {
+      const tracker = new Tracker(yargs.argv as unknown as CommonArgs);
       yargs
         .command(
           "start",

@@ -5,7 +5,7 @@ import prompt from "prompt";
 import clipboard from "clipboardy";
 import chalk from "chalk";
 
-import { messager } from "../utils/logger.js";
+import { messager, trackerLogger } from "../utils/logger.js";
 import { parseJSON, openFileInEditor } from "../utils/helpers.js";
 
 class Tracker {
@@ -119,9 +119,13 @@ class Tracker {
       ],
       (err, result) => {
         if (err) {
-          if (err.message !== "canceled" || this.args.verbose) {
-            messager.error("An error occurred:", err);
+          if (err.message.match("canceled|cancelled")) {
+            // handle sigint
+            messager.info("\nAction cancelled by user.");
+          } else {
+            console.error(err); // messager fails to log the stack
           }
+          process.exit(1);
         }
 
         if (typeof result.entry !== "string") {
@@ -131,6 +135,7 @@ class Tracker {
 
         const shouldQuit = ["q", "quit"];
         if (shouldQuit.includes(result.entry.toLowerCase())) {
+          messager.info("Action cancelled.");
           process.exit(0);
         } else if (result.entry === "n") {
           this.list(start + 10);
