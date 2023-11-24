@@ -18,6 +18,7 @@ import get from "../commands/get.js";
 import remove from "../commands/remove.js";
 import list from "../commands/list.js";
 import open from "../commands/open.js";
+import rename from "../commands/rename.js";
 import { parseJSON, lsImages } from "../utils/helpers.js";
 import { options } from "../help/index.js";
 import Tracker from "../commands/tracker.js";
@@ -228,6 +229,38 @@ yargs
           `Failed to open ${argv.img ? "images directory" : "clips file"} in ${
             argv.editor
           }`,
+        );
+      }
+    },
+  )
+
+  .command(
+    ["rename <key> <dest>", "mv <key> <dest>"],
+    "Renames clip or image file.",
+    (yargs) => {
+      yargs.positional("key", {
+        describe: "the key of the clip or image file to be renamed",
+        type: "string",
+      });
+      yargs.positional("dest", {
+        describe: "new name for clip or image file",
+        type: "string",
+      });
+      yargs.option("img", options.img.getDetails("rename"));
+      yargs.option("force", options.force.getDetails("rename"));
+      yargs.option("config", options.config.getDetails("rename"));
+      yargs.option("imagesPath", options.imagesPath.getDetails("rename"));
+    },
+    (argv) => {
+      appLogger.logCommand(argv as LogCommandArgs);
+      try {
+        rename(argv as unknown as RenameArgs);
+        appLogger.info(`Renamed ${argv.img ? "image" : "clip"}: SRC -> DEST`);
+      } catch (err) {
+        handleError(
+          err,
+          argv,
+          `Failed to rename ${argv.img ? "image" : "clip"}: SRC -> DEST`,
         );
       }
     },

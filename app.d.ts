@@ -33,12 +33,13 @@ declare global {
     | "remove"
     | "list"
     | "open"
+    | "rename"
     | "main"
     | "tracker";
 
   type CommandDescriptions = {
     [K in BasicCommand]?: string;
-  } & { default?: string };
+  } & { default: string };
 
   interface LogCommandArgs {
     [key: string]: any;
@@ -78,6 +79,10 @@ declare global {
 
   interface SetArgs extends GetArgs {
     content: string;
+  }
+
+  interface RenameArgs extends GetArgs {
+    dest: string;
   }
 
   interface ListArgs extends CommonArgs {

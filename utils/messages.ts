@@ -8,4 +8,7 @@ export const MESSAGES = {
     `\n${key}: no such key in ${fname} file. \nRun \`cb list ${
       config ? "-c" : ""
     }\` to see available keys.\n`,
+
+  RENAMED: (key: string | number, dest: string, fname: string) =>
+    `\nRenamed clip: ${key} -> ${dest}\n`,
 };
