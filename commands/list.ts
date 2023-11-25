@@ -13,6 +13,7 @@ import { messager } from "../utils/logger.js";
 import get from "../commands/get.js";
 import remove from "../commands/remove.js";
 import rename from "../commands/rename.js";
+import { command } from "yargs";
 
 const onSelectClip = {
   g: (entry: string[]) => clipboard.writeSync(entry[1]),
@@ -62,12 +63,16 @@ type ListImageFunction = (
   count?: number,
 ) => void;
 
-async function promptForCommand() {
+async function promptForCommand(img: boolean) {
+  const commands = img
+    ? `(g) get\t`
+    : `(g) get\t (c) cat\t (mv) rename\n (rm) delete\t`;
+
   prompt.start();
   return prompt.get([
     {
       name: `command`,
-      description: `Enter a command.\n (g) get\t (c) cat\t (mv) rename\t (rm) delete\t (q) quit`,
+      description: `Enter a command.\n ${commands} (q) quit\n`,
       default: "g",
       message: "Please enter a valid command",
       pattern: /q|quit|g|c|mv|rm/i,
@@ -129,7 +134,7 @@ function promptUser(
       } else if (result.entry === "n") {
         onNext(data, args, start + count, count);
       } else {
-        const { command } = await promptForCommand();
+        const { command } = await promptForCommand(args.img);
         if (typeof command === "string") {
           onSelect[command](data[Number(result.entry) - 1], args);
         }
