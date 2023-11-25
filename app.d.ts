@@ -74,7 +74,6 @@ declare global {
 
   interface GetArgs extends CommonArgs {
     key: number | string;
-    $0: string;
   }
 
   interface SetArgs extends GetArgs {

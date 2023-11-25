@@ -11,10 +11,29 @@ import {
 } from "../utils/helpers.js";
 import { messager } from "../utils/logger.js";
 import get from "../commands/get.js";
+import remove from "../commands/remove.js";
+import rename from "../commands/rename.js";
 
-function onSelectClip(entry: string[]) {
-  clipboard.writeSync(entry[1]);
-}
+const onSelectClip = {
+  g: (entry: string[]) => clipboard.writeSync(entry[1]),
+  c: (entry: string[]) => messager.info(entry[1]),
+  rm: (entry: string[], args: CommonArgs) => remove({ ...args, key: entry[0] }),
+  mv: async (entry: string[], args: CommonArgs) => {
+    prompt.start();
+    const { dest } = await prompt.get([
+      { name: "dest", description: `rename ${entry[0]} to what?` },
+    ]);
+    if (typeof dest === "string") {
+      rename({ ...args, key: entry[0], dest });
+    }
+  },
+};
+
+const onSelectImage = {
+  g: (entry: string[], args: CommonArgs): void => {
+    get({ ...args, key: entry[0] });
+  },
+};
 
 /**
  * Calculate number of entries to display, based on available space.
@@ -30,6 +49,7 @@ function numberEntries(rows: number, multiplier: number = 1, min: number = 0) {
 
 type ListTextFunction = (
   data: [string, string][],
+  args: CommonArgs,
   start?: number,
   count?: number,
   columns?: number,
@@ -37,17 +57,34 @@ type ListTextFunction = (
 
 type ListImageFunction = (
   data: [string, string][],
+  args: CommonArgs,
   start?: number,
   count?: number,
-  args?: GetArgs | ListArgs,
 ) => void;
+
+async function promptForCommand() {
+  prompt.start();
+  return prompt.get([
+    {
+      name: `command`,
+      description: `Enter a command.\n (g) get\t (c) cat\t (mv) rename\t (rm) delete\t (q) quit`,
+      default: "g",
+      message: "Please enter a valid command",
+      pattern: /q|quit|g|c|mv|rm/i,
+      required: true,
+    },
+  ]);
+}
 
 function promptUser(
   data: [string, string][],
   onNext: ListTextFunction | ListImageFunction,
-  onSelect: (entry: string[]) => void,
+  onSelect: {
+    [commandName: string]: (entry: string[], args: CommonArgs) => unknown;
+  },
   start = 0,
   count = 10,
+  args: CommonArgs,
 ) {
   if (data.length === 0) {
     messager.error("No matching entries found.");
@@ -57,7 +94,7 @@ function promptUser(
   const showing = Math.min(Math.min(count, data.length), data.length - start);
   const moreMatches = data.length > start + count;
 
-  let description = `Showing ${showing} of ${data.length} matches. Enter a number to load the clip to clipboard. Type 'q' to quit`;
+  let description = `Showing ${showing} of ${data.length} matches. Enter a number to select a clip. Type 'q' to quit`;
   description += moreMatches ? " or 'n' to show more matches." : ".";
 
   prompt.start();
@@ -71,7 +108,7 @@ function promptUser(
         required: true,
       },
     ],
-    (err, result) => {
+    async (err, result) => {
       if (err) {
         if (err.message.match("canceled|cancelled")) {
           // handle sigint
@@ -90,9 +127,12 @@ function promptUser(
       if (shouldQuit.includes(result.entry.toLowerCase())) {
         process.exit(0);
       } else if (result.entry === "n") {
-        onNext(data, start + count, count);
+        onNext(data, args, start + count, count);
       } else {
-        onSelect(data[Number(result.entry) - 1]);
+        const { command } = await promptForCommand();
+        if (typeof command === "string") {
+          onSelect[command](data[Number(result.entry) - 1], args);
+        }
       }
     },
   );
@@ -100,6 +140,7 @@ function promptUser(
 
 function listVerbosely(
   data: [string, string][],
+  args: CommonArgs,
   start = 0,
   count = 0,
   columns = 80,
@@ -118,29 +159,32 @@ function listVerbosely(
     )})\tKEY:   ${key}\n\tVALUE: ${chalk.blue(val)}\n\n`;
   });
   messager.info(res + `\n`);
-  promptUser(data, listVerbosely, onSelectClip, start, count);
+  promptUser(data, listVerbosely, onSelectClip, start, count, args);
 }
+listVerbosely;
 
-function listKeys(data: [string, string][], start = 0, count = 0) {
+function listKeys(
+  data: [string, string][],
+  args: CommonArgs,
+  start = 0,
+  count = 0,
+) {
   data.slice(start, start + count).forEach(([k, v], i) => {
     messager.info(`(${chalk.blue.bold(i + start + 1)}) ${k}`);
   });
-  promptUser(data, listKeys, onSelectClip, start, count);
+  promptUser(data, listKeys, onSelectClip, start, count, args);
 }
 
 function listImages(
   data: [string, string][],
+  args: CommonArgs,
   start = 0,
   count = 0,
-  args: GetArgs | ListArgs,
 ) {
   data.slice(start, start + count).forEach((entry, i) => {
     messager.info(`(${chalk.blue.bold(i + start + 1)}) ${entry[0]}`);
   });
-  const onSelect = (entry: string[]): void => {
-    get({ ...(args as GetArgs), key: entry[0] });
-  };
-  promptUser(data, listImages as ListImageFunction, onSelect, start, count);
+  promptUser(data, listImages, onSelectImage, start, count, args);
 }
 
 /**
@@ -165,7 +209,7 @@ function list(args: ListArgs) {
     const entries: [string, string][] = lsImages(imagesPath, pattern).map(
       (item) => [item, ""],
     );
-    listImages(entries, 0, numberEntries(rows, 0.85, 10), args);
+    listImages(entries, args, 0, numberEntries(rows, 0.85, 10));
     return;
   }
 
@@ -187,9 +231,9 @@ function list(args: ListArgs) {
   if (pretty) {
     printTableFromObject(data, columns, { key: maxKeyLength });
   } else if (verbose) {
-    listVerbosely(entries, 0, numberEntries(rows, 0.25, 5), columns);
+    listVerbosely(entries, args, 0, numberEntries(rows, 0.25, 5), columns);
   } else {
-    listKeys(entries, 0, numberEntries(rows, 0.85, 10));
+    listKeys(entries, args, 0, numberEntries(rows, 0.85, 10));
   }
 }
 
