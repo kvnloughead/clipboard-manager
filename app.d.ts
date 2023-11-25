@@ -16,6 +16,7 @@ declare global {
     historyFile: string;
     logsPath: string;
   }
+  g;
 
   type Option = keyof Options;
 

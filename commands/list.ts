@@ -11,15 +11,31 @@ import {
 } from "../utils/helpers.js";
 import { messager } from "../utils/logger.js";
 import get from "../commands/get.js";
+import set from "../commands/set.js";
 import remove from "../commands/remove.js";
 import rename from "../commands/rename.js";
-import { command } from "yargs";
+import { appLogger } from "../utils/logger.js";
 
-const onSelectClip = {
-  g: (entry: string[]) => clipboard.writeSync(entry[1]),
-  c: (entry: string[]) => messager.info(entry[1]),
-  rm: (entry: string[], args: CommonArgs) => remove({ ...args, key: entry[0] }),
-  mv: async (entry: string[], args: CommonArgs) => {
+/**
+ * Type of function to be called when entries are selected during
+ * interactive listing.
+ */
+interface onSelectFunction {
+  (entry: string[], args: CommonArgs): unknown;
+}
+
+/**
+ * An object containing functions to be called when selecting an item
+ * during interactive listing of text clips.
+ */
+const onSelectClip: Record<string, onSelectFunction> = {
+  g: (entry) => clipboard.writeSync(entry[1]),
+  s: (entry, args) => {
+    set({ ...args, key: entry[0], content: clipboard.readSync() });
+  },
+  c: (entry) => messager.info(entry[1]),
+  rm: (entry, args) => remove({ ...args, key: entry[0] }),
+  mv: async (entry, args) => {
     prompt.start();
     const { dest } = await prompt.get([
       { name: "dest", description: `rename ${entry[0]} to what?` },
@@ -30,9 +46,16 @@ const onSelectClip = {
   },
 };
 
-const onSelectImage = {
-  g: (entry: string[], args: CommonArgs): void => {
+/**
+ * An object containing functions to be called when selecting an item
+ * during interactive listing of image clips.
+ */
+const onSelectImage: Record<string, onSelectFunction> = {
+  g: (entry, args) => {
     get({ ...args, key: entry[0] });
+  },
+  s: (entry, args) => {
+    set({ ...args, key: entry[0], content: clipboard.readSync() });
   },
 };
 
@@ -65,8 +88,8 @@ type ListImageFunction = (
 
 async function promptForCommand(img: boolean) {
   const commands = img
-    ? `(g) get\t`
-    : `(g) get\t (c) cat\t (mv) rename\n (rm) delete\t`;
+    ? `(g) get\t (s) set\t`
+    : `(g) get\t (s) set\t (c) cat\n (mv) rename\t (rm) delete\t`;
 
   prompt.start();
   return prompt.get([
@@ -75,7 +98,7 @@ async function promptForCommand(img: boolean) {
       description: `Enter a command.\n ${commands} (q) quit\n`,
       default: "g",
       message: "Please enter a valid command",
-      pattern: /q|quit|g|c|mv|rm/i,
+      pattern: /q|quit|g|s|c|mv|rm/i,
       required: true,
     },
   ]);
@@ -135,8 +158,13 @@ function promptUser(
         onNext(data, args, start + count, count);
       } else {
         const { command } = await promptForCommand(args.img);
+        console.log(command);
         if (typeof command === "string") {
-          onSelect[command](data[Number(result.entry) - 1], args);
+          const entry = data[Number(result.entry) - 1];
+          onSelect[command](entry, args);
+          appLogger.info(
+            `Executing command '${command}' on key: '${entry[0]}' while listing.`,
+          );
         }
       }
     },

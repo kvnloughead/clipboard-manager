@@ -4,7 +4,10 @@ import path from "path";
 import fs from "fs";
 
 interface CustomLogger extends Logger {
-  logCommand: (args: { verbose: boolean; [key: string]: any }) => void;
+  logCommand: (
+    args: { verbose: boolean; [key: string]: any },
+    message?: string,
+  ) => void;
   debug: () => Logger;
 }
 
@@ -85,10 +88,11 @@ const messager = createLogger({
  * @param {object} args - default and user specified configuration
  * @param {boolean} args.verbose - whether to log verbosely
  */
-appLogger.logCommand = (args: LogCommandArgs) => {
-  appLogger.info(
-    `Executing command: \`cb ${process.argv.slice(2).join(" ")}\``,
-  );
+appLogger.logCommand = (
+  args: LogCommandArgs,
+  message = "Executing comand: ",
+) => {
+  appLogger.info(`${message} \`cb ${process.argv.slice(2).join(" ")}\``);
   if (args.verbose) {
     appLogger.info(
       `Current user configuration (including argv):\n${JSON.stringify(args)}`,
