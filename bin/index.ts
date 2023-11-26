@@ -89,10 +89,11 @@ yargs
 
   .command(
     ["set [key]", "s"],
-    "assigns clipboard contents to data[key]",
+    "Assigns clipboard contents to data[key]. By default, prompts user before overwriting.",
     (yargs) => {
       yargs.positional("key", {
-        describe: "key to associate with clipboard contents",
+        describe:
+          "key to associate with clipboard contents. If 0, prompting is omitted.",
         default: 0,
       });
       yargs.option("img", options.img.getDetails("set"));

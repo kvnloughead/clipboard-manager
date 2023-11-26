@@ -43,7 +43,12 @@ async function set(args: SetArgs) {
   const data = args.img
     ? lsImages(imagesPath)
     : JSON.parse(fs.readFileSync(file).toString());
-  if (force || (!args.img && !data[key]) || (args.img && !data.includes(key))) {
+  if (
+    force ||
+    key === 0 ||
+    (!args.img && !data[key]) ||
+    (args.img && !data.includes(key))
+  ) {
     await setClip(args);
   } else {
     await promptForConfirmation(args, {
