@@ -24,25 +24,36 @@ interface onSelectFunction {
   (entry: string[], args: CommonArgs): unknown;
 }
 
+type onSelectRecord = Record<string, { alias: string; fn: onSelectFunction }>;
+
 /**
  * An object containing functions to be called when selecting an item
  * during interactive listing of text clips.
  */
-const onSelectClip: Record<string, onSelectFunction> = {
-  g: (entry) => clipboard.writeSync(entry[1]),
-  s: (entry, args) => {
-    set({ ...args, key: entry[0], content: clipboard.readSync() });
+const onSelectClip: onSelectRecord = {
+  g: { alias: "get", fn: (entry) => clipboard.writeSync(entry[1]) },
+  s: {
+    alias: "set",
+    fn: (entry, args) => {
+      set({ ...args, key: entry[0], content: clipboard.readSync() });
+    },
   },
-  c: (entry) => messager.info(entry[1]),
-  rm: (entry, args) => remove({ ...args, key: entry[0] }),
-  mv: async (entry, args) => {
-    prompt.start();
-    const { dest } = await prompt.get([
-      { name: "dest", description: `rename ${entry[0]} to what?` },
-    ]);
-    if (typeof dest === "string") {
-      rename({ ...args, key: entry[0], dest });
-    }
+  c: { alias: "cat", fn: (entry) => messager.info(entry[1]) },
+  rm: {
+    alias: "remove",
+    fn: (entry, args) => remove({ ...args, key: entry[0] }),
+  },
+  mv: {
+    alias: "rename",
+    fn: async (entry, args) => {
+      prompt.start();
+      const { dest } = await prompt.get([
+        { name: "dest", description: `rename ${entry[0]} to what?` },
+      ]);
+      if (typeof dest === "string") {
+        rename({ ...args, key: entry[0], dest });
+      }
+    },
   },
 };
 
@@ -50,12 +61,18 @@ const onSelectClip: Record<string, onSelectFunction> = {
  * An object containing functions to be called when selecting an item
  * during interactive listing of image clips.
  */
-const onSelectImage: Record<string, onSelectFunction> = {
-  g: (entry, args) => {
-    get({ ...args, key: entry[0] });
+const onSelectImage: onSelectRecord = {
+  g: {
+    alias: "get",
+    fn: (entry, args) => {
+      get({ ...args, key: entry[0] });
+    },
   },
-  s: (entry, args) => {
-    set({ ...args, key: entry[0], content: clipboard.readSync() });
+  s: {
+    alias: "set",
+    fn: (entry, args) => {
+      set({ ...args, key: entry[0], content: clipboard.readSync() });
+    },
   },
 };
 
@@ -86,10 +103,14 @@ type ListImageFunction = (
   count?: number,
 ) => void;
 
-async function promptForCommand(img: boolean) {
-  const commands = img
-    ? `(g) get\t (s) set\t`
-    : `(g) get\t (s) set\t (c) cat\n (mv) rename\t (rm) delete\t`;
+async function promptForCommand(onSelect: onSelectRecord) {
+  const commands = Object.entries(onSelect)
+    .sort()
+    .map(([k, v], i) => {
+      return `(${k}) ${v.alias}${(i + 1) % 3 === 0 ? "\n" : "\t\t"}`;
+    })
+    .join("");
+  console.log(commands);
 
   prompt.start();
   return prompt.get([
@@ -107,9 +128,7 @@ async function promptForCommand(img: boolean) {
 function promptUser(
   data: [string, string][],
   onNext: ListTextFunction | ListImageFunction,
-  onSelect: {
-    [commandName: string]: (entry: string[], args: CommonArgs) => unknown;
-  },
+  onSelect: onSelectRecord,
   start = 0,
   count = 10,
   args: CommonArgs,
@@ -157,11 +176,11 @@ function promptUser(
       } else if (result.entry === "n") {
         onNext(data, args, start + count, count);
       } else {
-        const { command } = await promptForCommand(args.img);
+        const { command } = await promptForCommand(onSelect);
         console.log(command);
         if (typeof command === "string") {
           const entry = data[Number(result.entry) - 1];
-          onSelect[command](entry, args);
+          onSelect[command].fn(entry, args);
           appLogger.info(
             `Executing command '${command}' on key: '${entry[0]}' while listing.`,
           );
