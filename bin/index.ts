@@ -78,6 +78,8 @@ const completionFunction: FallbackCompletionFunction = (
   }
 };
 
+const tracker = new Tracker(config);
+
 yargs
   .env("CB")
   .option("verbose", options.verbose.getDetails("main"))
@@ -119,7 +121,7 @@ yargs
 
   .command(
     ["get [key]", "g"],
-    "loads the value cb[key] to the clipboard",
+    "Loads the value cb[key] to the clipboard",
     (yargs) => {
       yargs.positional("key", {
         describe: "key to access from data file",
@@ -146,7 +148,7 @@ yargs
 
   .command(
     ["remove <key>", "rm <key>", "r <key>", "del <key>", "d <key>"],
-    "deletes the key:value pair",
+    "Deletes the key:value pair",
     (yargs) => {
       yargs.positional("key", {
         describe: "key to remove from data",
@@ -265,7 +267,6 @@ yargs
     ["tracker"],
     "Start, stop, restart, or interact with clipboard history tracker.",
     (yargs) => {
-      const tracker = new Tracker(yargs.argv as unknown as CommonArgs);
       yargs
         .command(
           "start",

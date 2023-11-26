@@ -34,16 +34,18 @@ On OSX, use `.bash_profile` instead of `.bashrc`.
 cb <command>
 
 Commands:
-  cb set [key]       assigns clipboard contents to data[key]        [aliases: s]
-  cb get [key]       loads the value cb[key] to the clipboard       [aliases: g]
-  cb remove <key>    deletes the key:value pair         [aliases: rm, r, del, d]
-  cb list [pattern]  Outputs list of current clips to the terminal. If the verbo
-                     se flag is set, pattern matching checks values as well as k
-                     eys.                                           [aliases: l]
-  cb open            Opens clips file in editor.                    [aliases: o]
-  cb tracker         Start, stop, restart, or interact with clipboard history tr
-                     acker.
-  cb completion      generate completion script
+  cb set [key]            Assigns clipboard contents to data[key]. By default, p
+                          rompts user before overwriting.           [aliases: s]
+  cb get [key]            Loads the value cb[key] to the clipboard  [aliases: g]
+  cb remove <key>         Deletes the key:value pair    [aliases: rm, r, del, d]
+  cb list [pattern]       Outputs list of current clips to the terminal. If the
+                          verbose flag is set, pattern matching checks values as
+                           well as keys.                            [aliases: l]
+  cb open                 Opens clips file in editor.               [aliases: o]
+  cb rename <key> <dest>  Renames clip or image file.              [aliases: mv]
+  cb tracker              Start, stop, restart, or interact with clipboard histo
+                          ry tracker.
+  cb completion           generate completion script
 
 Options:
       --version       Show version number                              [boolean]
@@ -56,7 +58,6 @@ Options:
       --clipsFile     Path to file to store clips in.
                          [string] [default: "/home/kevin/.config/cb/clips.json"]
   -h, --help          Show help                                        [boolean]
-
 ```
 
 ## Subcommands and options of tracker subcommand
@@ -103,3 +104,7 @@ The following scripts are included in package.json.
 - `build:dev` - builds with `tsc`. The dev build will always mark `dist/bin/index.js` as executable.
 - `build:prod` - builds with `tsc`. The prod build only marks `dist/bind/index.js` as executable if no errors are emitted by `tsc`.
 - `watch` - watches files and rebuilds with `tsc` on change.
+
+```
+
+```
