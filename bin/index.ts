@@ -26,7 +26,7 @@ import { handleError } from "../utils/errors.js";
 const defaults: Options = Object.fromEntries(
   Object.entries(options).map(([name, option]) => {
     return [name, option.getDetails("default").default];
-  }),
+  })
 ) as unknown as Options;
 
 // Merge user config with defaults
@@ -55,11 +55,11 @@ const completionFunction: FallbackCompletionFunction = (
   _current: string,
   argv: CommonArgs,
   completionFilter: (onCompleted?: CompletionCallback) => any,
-  done: (completions: string[]) => any,
+  done: (completions: string[]) => any
 ) => {
   if (
     ["g", "get", "s", "set", "rm", "remove", "d", "del", "mv", "rename"].some(
-      (val) => argv._.includes(val),
+      (val) => argv._.includes(val)
     )
   ) {
     completionFilter((_err, _defaultCompletions) => {
@@ -165,10 +165,10 @@ yargs
         handleError(
           err,
           argv,
-          `Failed to retrieve data for (key: ${argv.key}).`,
+          `Failed to retrieve data for (key: ${argv.key}).`
         );
       }
-    },
+    }
   )
 
   .command(
@@ -189,7 +189,7 @@ yargs
       } catch (err) {
         handleError(err, argv, `Failed to delete clip (key: ${argv.key}).`);
       }
-    },
+    }
   )
 
   .command(
@@ -220,10 +220,10 @@ yargs
         handleError(
           err,
           argv,
-          `Failed to list ${argv.img ? "images" : "clips"}`,
+          `Failed to list ${argv.img ? "images" : "clips"}`
         );
       }
-    },
+    }
   )
 
   .command(
@@ -242,7 +242,7 @@ yargs
         appLogger.info(
           `Opened ${argv.img ? "images directory" : "clips file"} in ${
             argv.editor
-          }`,
+          }`
         );
       } catch (err) {
         handleError(
@@ -250,10 +250,10 @@ yargs
           argv,
           `Failed to open ${argv.img ? "images directory" : "clips file"} in ${
             argv.editor
-          }`,
+          }`
         );
       }
-    },
+    }
   )
 
   .command(
@@ -282,10 +282,10 @@ yargs
         handleError(
           err,
           argv,
-          `Failed to rename ${argv.img ? "image" : "clip"}: SRC -> DEST`,
+          `Failed to rename ${argv.img ? "image" : "clip"}: SRC -> DEST`
         );
       }
-    },
+    }
   )
 
   .command(
@@ -296,32 +296,32 @@ yargs
         .command(
           "start",
           "Starts the clipboard tracking process in the background.",
-          () => tracker.start(),
+          () => tracker.start()
         )
         .command(
           "stop",
           "Stops the clipboard tracking background process.",
-          () => tracker.stop(),
+          () => tracker.stop()
         )
         .command(
           "restart",
           "Restarts the clipboard tracking background process.",
-          () => tracker.restart(),
+          () => tracker.restart()
         )
         .command(
           "status",
           "Checks status of clipboard tracking background process.",
-          () => tracker.status(),
+          () => tracker.status()
         )
         .command(
           "open",
           "Opens the clipboard history file in your chosen editor.",
-          () => tracker.open(),
+          () => tracker.open()
         )
         .command(
           "list",
           "Lists recent clipboard history and provides an interface for selecting entries.",
-          () => tracker.list(),
+          () => tracker.list()
         );
       yargs.option("maxClipHistory", {
         type: "number",
@@ -330,7 +330,7 @@ yargs
       });
       yargs.option("historyFile", options.historyFile.getDetails("tracker"));
       yargs.option("logsPath", options.logsPath.getDetails("tracker"));
-    },
+    }
   )
 
   .demandCommand()

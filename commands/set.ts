@@ -24,15 +24,15 @@ async function setClip(args: SetArgs) {
             messager.error(`Failed to save image to key ${key}.`);
             reject(
               new Error(
-                `Failed to save image to key ${key}.\n${error}\n${stderr}`,
-              ),
+                `Failed to save image to key ${key}.\n${error}\n${stderr}`
+              )
             );
           } else {
             fs.renameSync(tempPath, finalPath);
             messager.info(`Image saved successfully`);
             resolve();
           }
-        },
+        }
       );
     }
   });

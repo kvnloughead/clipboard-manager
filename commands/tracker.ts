@@ -42,7 +42,7 @@ class Tracker {
     const pid = parseInt(fs.readFileSync(this.trackerPidPath, "utf-8"));
     if (Number.isInteger(pid)) {
       messager.info(
-        `Process with id ${pid} is already running. \nTry running \`cb tracker stop\` or \`cb tracker restart\` instead.`,
+        `Process with id ${pid} is already running. \nTry running \`cb tracker stop\` or \`cb tracker restart\` instead.`
       );
       return;
     }
@@ -102,7 +102,7 @@ class Tracker {
     const history = parseJSON(this.historyFile);
     history.slice(start, start + 10).forEach((item: string, i: number) => {
       messager.info(
-        `(${chalk.blue.bold(`${i + start + 1}`)})\t ${item.slice(0, 100)}`,
+        `(${chalk.blue.bold(`${i + start + 1}`)})\t ${item.slice(0, 100)}`
       );
     });
 
@@ -142,7 +142,7 @@ class Tracker {
         } else {
           clipboard.writeSync(history[Number(result.entry) - 1]);
         }
-      },
+      }
     );
   }
 }

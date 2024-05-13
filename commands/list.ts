@@ -127,7 +127,7 @@ function parseEntry(entry: string) {
  */
 async function getCommand(
   entry: string,
-  onSelect: onSelectRecord,
+  onSelect: onSelectRecord
 ): Promise<{ item: string; command: string | RevalidatorSchema }> {
   const parsedEntry = parseEntry(entry);
   const { item, command } = parsedEntry;
@@ -182,7 +182,7 @@ type ListingFunction = (
   args: CommonArgs,
   start?: number,
   count?: number,
-  columns?: number,
+  columns?: number
 ) => void;
 
 /**
@@ -210,7 +210,7 @@ function promptUser(
   onSelect: onSelectRecord,
   start = 0,
   count = 10,
-  args: CommonArgs,
+  args: CommonArgs
 ) {
   if (data.length === 0) {
     messager.error("No matching entries found.");
@@ -261,11 +261,11 @@ function promptUser(
           const entry = data[Number(item) - 1];
           onSelect[command].fn(entry, args);
           appLogger.info(
-            `Executing command '${command}' on key: '${entry[0]}' while listing.`,
+            `Executing command '${command}' on key: '${entry[0]}' while listing.`
           );
         }
       }
-    },
+    }
   );
 }
 
@@ -274,7 +274,7 @@ const listVerbosely: ListingFunction = (
   args,
   start = 0,
   count = 0,
-  columns = 80,
+  columns = 80
 ) => {
   let res = `\n`;
   data.slice(start, start + count).forEach(([k, v], i) => {
@@ -286,7 +286,7 @@ const listVerbosely: ListingFunction = (
       ? truncateString(val, (3 * columns) / 4, { ellipsis: false })
       : val;
     res += `(${chalk.blue.bold(
-      i + start + 1,
+      i + start + 1
     )})\tKEY:   ${key}\n\tVALUE: ${chalk.blue(val)}\n\n`;
   });
   messager.info(res + `\n`);
@@ -328,7 +328,7 @@ function list(args: ListArgs) {
   // List images
   if (args.img) {
     const entries: [string, string][] = lsImages(imagesPath, pattern).map(
-      (item) => [item, ""],
+      (item) => [item, ""]
     );
     listImages(entries, args, 0, numberEntries(rows, 0.85, 10));
     return;
@@ -342,7 +342,7 @@ function list(args: ListArgs) {
         return k.match(pattern) || v.match(pattern);
       }
       return k.match(pattern);
-    },
+    }
   );
 
   const maxKeyLength = Math.max(...Object.keys(data).map((k) => k.length));

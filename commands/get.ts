@@ -36,7 +36,7 @@ function get(args: GetArgs, pipe: boolean) {
             messager.error({ error });
             messager.error({ stderr });
           }
-        },
+        }
       );
     } else {
       messager.error("Image not found");
