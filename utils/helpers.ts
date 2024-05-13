@@ -2,9 +2,11 @@ import fs from "fs";
 import fsPromises from "promise-fs";
 import path from "path";
 import { spawn } from "child_process";
+import * as readline from "readline";
 import prompt from "prompt";
 import { messager } from "../utils/logger.js";
 import { CancelActionError } from "./errors.js";
+import set from "../commands/set.js";
 
 export function openFileInEditor(editor: string, file: string) {
   spawn(editor, [file], { stdio: "inherit" });
@@ -37,11 +39,47 @@ function parseYes(str: string) {
 
 export function filterObj(
   obj: { [s: string]: string },
-  onConfirm: (k: string, v: string) => RegExpMatchArray | null,
+  onConfirm: (k: string, v: string) => RegExpMatchArray | null
 ) {
   return Object.fromEntries(
-    Object.entries(obj).filter(([k, v]) => onConfirm(k, v)),
+    Object.entries(obj).filter(([k, v]) => onConfirm(k, v))
   );
+}
+
+// Prompts user to edit the value of the supplied key. If the user presses
+// Enter, the edit occurs and the prompt exits. The set command is forced, so
+// there will be no prompt after the user hits Enter.
+//
+// A later version may support the final prompting, but it seems like it may
+// require switching from the prompt library to native Node utilities, to
+// prevent duplicication of input/output.
+export async function promptForUpdate(args: GetArgs, value: string) {
+  return new Promise((resolve, reject) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+      prompt: `\nEditing value for key ${args.key}: \n\n`,
+    });
+
+    rl.write(value);
+    rl.prompt();
+
+    rl.on("line", (line: any) => {
+      resolve(line);
+      rl.close();
+    })
+      .on("close", () => {
+        resolve(value);
+      })
+      .on("SIGINT", () => {
+        console.log("\nExiting");
+        rl.close();
+        resolve(value);
+      })
+      .on("error", (err) => {
+        reject(err);
+      });
+  });
 }
 
 export async function promptForConfirmation(
@@ -50,7 +88,7 @@ export async function promptForConfirmation(
     userPrompt,
     onExit = "Operation was canceled by the user.",
     onConfirm,
-  }: { userPrompt: string; onExit: string; onConfirm: () => unknown },
+  }: { userPrompt: string; onExit: string; onConfirm: () => unknown }
 ) {
   return new Promise((resolve, reject) => {
     prompt.start();
@@ -77,7 +115,7 @@ export async function promptForConfirmation(
           messager.error(onExit);
           reject(new CancelActionError(onExit));
         }
-      },
+      }
     );
   });
 }
@@ -93,7 +131,7 @@ export async function promptForConfirmation(
 export function truncateString(
   s: string,
   length: number,
-  { ellipsis = true }: { ellipsis?: boolean },
+  { ellipsis = true }: { ellipsis?: boolean }
 ) {
   if (ellipsis) {
     return s.length < length ? s : s.substring(0, length - 3) + "...";
@@ -113,7 +151,7 @@ export function truncateString(
 export function printTableFromObject(
   obj: { [s: string]: string },
   width: number,
-  padding: { key: any; val?: any },
+  padding: { key: any; val?: any }
 ) {
   const columns = Object.fromEntries(
     Object.entries(obj).map(([k, v]) => {
@@ -122,7 +160,7 @@ export function printTableFromObject(
       newVal = truncateString(newVal, width / 2, {});
       newVal = padding.val ? newVal.padStart(padding.val, " ") : newVal;
       return [key, newVal];
-    }),
+    })
   );
   console.table(columns);
 }
@@ -138,7 +176,7 @@ export function printTableFromObject(
 export async function createAndWriteToFile(
   file: string,
   contents: string,
-  options: { recursive: boolean },
+  options: { recursive: boolean }
 ) {
   const { recursive = false } = options;
 

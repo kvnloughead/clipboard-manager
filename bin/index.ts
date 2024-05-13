@@ -15,6 +15,7 @@ import remove from "../commands/remove.js";
 import list from "../commands/list.js";
 import open from "../commands/open.js";
 import rename from "../commands/rename.js";
+import update from "../commands/update.js";
 import { parseJSON, lsImages } from "../utils/helpers.js";
 import { options } from "../help/index.js";
 import Tracker from "../commands/tracker.js";
@@ -58,9 +59,20 @@ const completionFunction: FallbackCompletionFunction = (
   done: (completions: string[]) => any
 ) => {
   if (
-    ["g", "get", "s", "set", "rm", "remove", "d", "del", "mv", "rename"].some(
-      (val) => argv._.includes(val)
-    )
+    [
+      "g",
+      "get",
+      "s",
+      "set",
+      "rm",
+      "remove",
+      "d",
+      "del",
+      "mv",
+      "rename",
+      "u",
+      "update",
+    ].some((val) => argv._.includes(val))
   ) {
     completionFilter((_err, _defaultCompletions) => {
       const keys = argv.img
@@ -167,6 +179,29 @@ yargs
           argv,
           `Failed to retrieve data for (key: ${argv.key}).`
         );
+      }
+    }
+  )
+
+  .command(
+    ["update [key]", "u"],
+    "Updates the value of cb[key]",
+    (yargs) => {
+      yargs.positional("key", {
+        describe: "key to access from data file",
+        default: 0,
+      });
+      yargs.option("img", options.img.getDetails("get"));
+      yargs.option("config", options.config.getDetails("get"));
+      yargs.option("imagesPath", options.imagesPath.getDetails("get"));
+    },
+    (argv) => {
+      appLogger.logCommand(argv as LogCommandArgs);
+      try {
+        update(argv as unknown as GetArgs);
+        appLogger.info(`Data successfully updated for key: ${argv.key}`);
+      } catch (err) {
+        handleError(err, argv, `Failed to update data for (key: ${argv.key}).`);
       }
     }
   )
