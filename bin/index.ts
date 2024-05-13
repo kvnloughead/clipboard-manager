@@ -60,6 +60,8 @@ const completionFunction: FallbackCompletionFunction = (
 ) => {
   if (
     [
+      "c",
+      "cat",
       "g",
       "get",
       "s",
