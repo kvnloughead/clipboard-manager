@@ -69,7 +69,7 @@ const onSelectImage: onSelectRecord = {
   g: {
     alias: "get",
     fn: (entry, args) => {
-      get({ ...args, key: entry[0] });
+      get({ ...args, key: entry[0] }, false);
     },
   },
   s: {

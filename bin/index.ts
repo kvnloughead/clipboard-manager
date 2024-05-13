@@ -111,12 +111,37 @@ yargs
         appLogger.info(
           `${argv.img ? "Image saved" : "Data set"} successfully for key: ${
             argv.key
-          }`,
+          }`
         );
       } catch (err) {
         handleError(err, argv, `Failed to set clip (key: ${argv.key}).`);
       }
+    }
+  )
+
+  .command(
+    ["cat [key]", "c"],
+    "Outputs the value cb[key] to the clipboard",
+    (yargs) => {
+      yargs.positional("key", {
+        describe: "key to access from data file",
+        default: 0,
+      });
+      yargs.option("config", options.config.getDetails("get"));
     },
+    (argv) => {
+      appLogger.logCommand(argv as LogCommandArgs);
+      try {
+        get(argv as unknown as GetArgs, true);
+        appLogger.info(`Data retrieved successfully for key: ${argv.key}`);
+      } catch (err) {
+        handleError(
+          err,
+          argv,
+          `Failed to retrieve data for (key: ${argv.key}).`
+        );
+      }
+    }
   )
 
   .command(
@@ -134,7 +159,7 @@ yargs
     (argv) => {
       appLogger.logCommand(argv as LogCommandArgs);
       try {
-        get(argv as unknown as GetArgs);
+        get(argv as unknown as GetArgs, false);
         appLogger.info(`Data retrieved successfully for key: ${argv.key}`);
       } catch (err) {
         handleError(

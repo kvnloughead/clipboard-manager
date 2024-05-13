@@ -8,9 +8,8 @@ import { MissingKeyError, NotFoundError } from "../utils/errors.js";
 import { MESSAGES } from "../utils/messages.js";
 import { messager } from "../utils/logger.js";
 
-function get(args: GetArgs) {
+function get(args: GetArgs, pipe: boolean) {
   const { file, imagesPath, key, config } = args;
-  const isTTY = Boolean(process.stdout.isTTY);
 
   if (!args.img) {
     const data = parseJSON(file);
@@ -19,7 +18,9 @@ function get(args: GetArgs) {
       messager.error(MESSAGES.MISSING_KEY(key, fname, config));
       throw new MissingKeyError(`Key ${key} is not found in ${fname}`);
     } else {
-      isTTY ? clipboard.writeSync(data[key]) : messager.info(data[key]);
+      // If the cat command is run instead of get, pipe the output to
+      // the terminal.
+      pipe ? messager.info(data[key]) : clipboard.writeSync(data[key]);
     }
   } else {
     const file = path.join(imagesPath, key.toString() + ".png");
