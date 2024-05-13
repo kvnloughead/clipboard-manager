@@ -193,9 +193,7 @@ yargs
         describe: "key to access from data file",
         default: 0,
       });
-      yargs.option("img", options.img.getDetails("get"));
       yargs.option("config", options.config.getDetails("get"));
-      yargs.option("imagesPath", options.imagesPath.getDetails("get"));
     },
     (argv) => {
       appLogger.logCommand(argv as LogCommandArgs);
