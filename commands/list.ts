@@ -14,6 +14,7 @@ import get from "../commands/get.js";
 import set from "../commands/set.js";
 import remove from "../commands/remove.js";
 import rename from "../commands/rename.js";
+import update from "../commands/update.js";
 import { appLogger } from "../utils/logger.js";
 
 /**
@@ -57,6 +58,12 @@ const onSelectClip: onSelectRecord = {
       if (typeof dest === "string") {
         rename({ ...args, key: entry[0], dest });
       }
+    },
+  },
+  u: {
+    alias: "update",
+    fn: async (entry, args) => {
+      update({ ...args, key: entry[0] });
     },
   },
 };
