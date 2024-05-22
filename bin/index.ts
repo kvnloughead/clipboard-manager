@@ -187,7 +187,7 @@ yargs
 
   .command(
     ["update [key]", "u"],
-    "Updates the value of cb[key]",
+    "Prompts user to updates the value of cb[key]",
     (yargs) => {
       yargs.positional("key", {
         describe: "key to access from data file",
