@@ -292,19 +292,14 @@ yargs
   )
 
   .command(
-    ["rename <key> <dest>", "mv <key> <dest>"],
-    "Renames clip or image file.",
+    ["rename <key>", "mv <key>"],
+    "Prompts user to renames a clip or image file.",
     (yargs) => {
       yargs.positional("key", {
         describe: "the key of the clip or image file to be renamed",
         type: "string",
       });
-      yargs.positional("dest", {
-        describe: "new name for clip or image file",
-        type: "string",
-      });
       yargs.option("img", options.img.getDetails("rename"));
-      yargs.option("force", options.force.getDetails("rename"));
       yargs.option("config", options.config.getDetails("rename"));
       yargs.option("imagesPath", options.imagesPath.getDetails("rename"));
     },
