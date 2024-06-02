@@ -17,9 +17,10 @@ async function rename(args: RenameArgs) {
   }
   const value = data[key];
 
-  const dest = await promptForUpdate(args, String(key));
+  const dest = await promptForUpdate(args, String(key), "Rename key:");
   set({ ...args, key: String(dest), content: value, force: true });
   remove({ ...args, key, force: true, quiet: true });
+  messager.info(`\nRenamed ${key} to ${dest}`);
 }
 
 export default rename;

@@ -15,7 +15,11 @@ async function update(args: GetArgs) {
     throw new MissingKeyError();
   }
 
-  const updated = await promptForUpdate(args, data[key]);
+  const updated = await promptForUpdate(
+    args,
+    data[key],
+    `Update value for key ${key}:`
+  );
   set({ ...args, content: String(updated), force: true });
 }
 

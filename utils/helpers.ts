@@ -46,19 +46,23 @@ export function filterObj(
   );
 }
 
-// Prompts user to edit the value of the supplied key. If the user presses
-// Enter, the edit occurs and the prompt exits. The set command is forced, so
-// there will be no prompt after the user hits Enter.
+// Prompts user to edit a string value. If the user presses Enter, the
+// edit occurs and the prompt exits. The set command is forced, so there will
+// be no prompt after the user hits Enter.
 //
 // A later version may support the final prompting, but it seems like it may
 // require switching from the prompt library to native Node utilities, to
 // prevent duplication of input/output.
-export async function promptForUpdate(args: GetArgs, value: string) {
+export async function promptForUpdate(
+  args: GetArgs,
+  value: string,
+  prompt: string = "Editing value:"
+) {
   return new Promise((resolve, reject) => {
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
-      prompt: `\nEditing value for key ${args.key}: \n\n`,
+      prompt: `\n${prompt} \n\n`,
     });
 
     rl.write(value);
