@@ -52,7 +52,7 @@ export function filterObj(
 //
 // A later version may support the final prompting, but it seems like it may
 // require switching from the prompt library to native Node utilities, to
-// prevent duplicication of input/output.
+// prevent duplication of input/output.
 export async function promptForUpdate(args: GetArgs, value: string) {
   return new Promise((resolve, reject) => {
     const rl = readline.createInterface({
