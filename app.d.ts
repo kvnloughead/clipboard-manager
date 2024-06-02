@@ -4,6 +4,7 @@ declare global {
   }
 
   interface Options {
+    quiet?: boolean;
     verbose?: boolean;
     img?: boolean;
     editor?: boolean;
@@ -16,7 +17,6 @@ declare global {
     historyFile: string;
     logsPath: string;
   }
-  g;
 
   type Option = keyof Options;
 
@@ -71,6 +71,7 @@ declare global {
     logsPath: string;
     configPath: string;
     file: string;
+    quiet: boolean;
   }
 
   interface GetArgs extends CommonArgs {

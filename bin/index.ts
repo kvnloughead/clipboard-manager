@@ -215,6 +215,7 @@ yargs
       });
       yargs.option("force", options.force.getDetails("remove"));
       yargs.option("config", options.config.getDetails("remove"));
+      yargs.option("quiet", options.quiet.getDetails("remove"));
     },
     async (argv) => {
       appLogger.logCommand(argv as LogCommandArgs);

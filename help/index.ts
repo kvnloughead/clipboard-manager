@@ -33,6 +33,16 @@ class OptionGenerator {
 }
 
 export const options = {
+  quiet: new OptionGenerator(
+    "quiet",
+    {
+      default: "Supress logging.",
+      remove:
+        "Prevent logging of success, unless the verbose flag is also set.",
+    },
+    { alias: "q", default: false, boolean: true }
+  ),
+
   verbose: new OptionGenerator(
     "verbose",
     {

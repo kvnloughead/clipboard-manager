@@ -6,13 +6,13 @@ import { promptForConfirmation } from "../utils/helpers.js";
 import { MissingKeyError } from "../utils/errors.js";
 
 function deleteClip(data: { [x: string]: any }, args: GetArgs) {
-  const { file, key, verbose } = args;
+  const { file, key, quiet, verbose } = args;
   const val = data[key];
   delete data[key];
   fs.writeFileSync(file, JSON.stringify(data, null, 2));
   if (verbose) {
     messager.info(MESSAGES.DELETED(key, val, file));
-  } else {
+  } else if (!quiet) {
     messager.info(`Clip deleted (key: ${key})`);
   }
 }

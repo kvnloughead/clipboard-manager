@@ -19,7 +19,7 @@ async function rename(args: RenameArgs) {
 
   const dest = await promptForUpdate(args, String(key));
   set({ ...args, key: String(dest), content: value, force: true });
-  remove({ ...args, key, force: true });
+  remove({ ...args, key, force: true, quiet: true });
 }
 
 export default rename;
