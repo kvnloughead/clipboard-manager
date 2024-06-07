@@ -54,7 +54,6 @@ export function filterObj(
 // require switching from the prompt library to native Node utilities, to
 // prevent duplication of input/output.
 export async function promptForUpdate(
-  args: GetArgs,
   value: string,
   prompt: string = "Editing value:"
 ) {
@@ -62,7 +61,7 @@ export async function promptForUpdate(
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
-      prompt: `\n${prompt} \n\n`,
+      prompt: `\n${prompt} `,
     });
 
     rl.write(value);

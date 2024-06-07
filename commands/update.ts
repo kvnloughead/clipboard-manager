@@ -7,7 +7,7 @@ import { MissingKeyError } from "../utils/errors.js";
 import set from "./set.js";
 
 async function update(args: GetArgs) {
-  const { file, key, config, force } = args;
+  const { file, key, config } = args;
   const data = JSON.parse(fs.readFileSync(file).toString());
   const fname = config ? "config" : "clips";
   if (!data[key]) {
@@ -16,9 +16,8 @@ async function update(args: GetArgs) {
   }
 
   const updated = await promptForUpdate(
-    args,
     data[key],
-    `Update value for key ${key}:`
+    `Update value for key ${key}:\n\n`
   );
   set({ ...args, content: String(updated), force: true });
 }
