@@ -52,12 +52,7 @@ const onSelectClip: onSelectRecord = {
     alias: "rename",
     fn: async (entry, args) => {
       prompt.start();
-      const { dest } = await prompt.get([
-        { name: "dest", description: `rename ${entry[0]} to what?` },
-      ]);
-      if (typeof dest === "string") {
-        rename({ ...args, key: entry[0], dest });
-      }
+      rename({ ...args, key: entry[0] });
     },
   },
   u: {

@@ -83,7 +83,7 @@ declare global {
   }
 
   interface RenameArgs extends GetArgs {
-    dest: string;
+    dest?: string;
   }
 
   interface ListArgs extends CommonArgs {
