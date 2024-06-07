@@ -4,9 +4,9 @@ import path from "path";
 import { spawn } from "child_process";
 import * as readline from "readline";
 import prompt from "prompt";
+
 import { messager } from "../utils/logger.js";
 import { CancelActionError } from "./errors.js";
-import set from "../commands/set.js";
 
 export function openFileInEditor(editor: string, file: string) {
   spawn(editor, [file], { stdio: "inherit" });
@@ -76,8 +76,8 @@ export async function promptForUpdate(
       })
       .on("SIGINT", () => {
         console.log("\nExiting");
+        reject(value);
         rl.close();
-        resolve(value);
       })
       .on("error", (err) => {
         reject(err);
