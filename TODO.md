@@ -15,6 +15,12 @@
   - [ ] better pagination: (p) to see previous matches
   - [ ] improve in-app documentation and prompts.
 
+## Docs
+
+- [ ] add additional command documentation
+- [ ] document configuration options
+
 ## Tracker
 
-- [ ] Add an `enable` subcommand to allow automatic startup.
+- [ ] add an `enable` subcommand to allow automatic startup.
+- [ ] document all subcommands

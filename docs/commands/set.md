@@ -15,13 +15,11 @@ Images are saved as PNGs.
 
 ## Usage for plaintext clips
 
-<pre style="padding-top: 0;">
-<code>
-<span style="color: green;"># Set the value of the zero key.</span>
-<span style="color: green;"># Equivalent to `cb set 0`.</span>
+```
+# Set the value of the zero key.
+# Equivalent to `cb set 0`.
 $ cb set
 
-<span style="color: green;"># Create a new key/value pair, or update the value of an existing pair.</span>
+# Create a new key/value pair, or update the value of an existing pair.
 $ cb set key
-</code>
-</pre>
+```
