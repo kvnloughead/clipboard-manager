@@ -13,9 +13,9 @@ function get(args: GetArgs, pipe: boolean) {
 
   if (!args.img) {
     const data = parseJSON(file);
-    const fname = config ? "config" : "clips";
+    const fname = config ? "config file" : "clips file";
     if (!data[key]) {
-      messager.error(MESSAGES.MISSING_KEY(key, fname, config));
+      messager.error(MESSAGES.MISSING_KEY(key, fname, config, false));
       throw new MissingKeyError(`Key ${key} is not found in ${fname}`);
     } else {
       // If the cat command is run instead of get, pipe the output to
@@ -39,8 +39,9 @@ function get(args: GetArgs, pipe: boolean) {
         }
       );
     } else {
-      messager.error("Image not found");
-      throw new NotFoundError("Image not found");
+      const fname = "images directory";
+      messager.error(MESSAGES.MISSING_KEY(key, fname, false, true));
+      throw new MissingKeyError(`Key ${key} is not found in ${fname}`);
     }
   }
 }
