@@ -22,7 +22,7 @@ async function remove(args: GetArgs) {
   const data = JSON.parse(fs.readFileSync(file).toString());
   const fname = config ? "config" : "clips";
   if (!data[key]) {
-    messager.error(MESSAGES.MISSING_KEY(key, fname, config));
+    messager.error(MESSAGES.MISSING_KEY(key, fname, config, false));
     throw new MissingKeyError();
   }
   if (force) {
