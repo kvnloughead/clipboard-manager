@@ -1,5 +1,9 @@
 # Todo
 
+## Bug fixes
+
+- [ ] update command should work right with multiline clips
+
 ## Main
 
 - [ ] Support files
