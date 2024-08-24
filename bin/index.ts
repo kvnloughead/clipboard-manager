@@ -325,6 +325,11 @@ yargs
     (yargs) => {
       yargs
         .command(
+          "enable",
+          "Enables the clipboard tracking process to restart after crashes and start after system restart.",
+          () => tracker.enable()
+        )
+        .command(
           "start",
           "Starts the clipboard tracking process in the background.",
           () => tracker.start()

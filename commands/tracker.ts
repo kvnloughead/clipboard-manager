@@ -1,11 +1,12 @@
-import { spawn } from "child_process";
+import { spawn, execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 import prompt from "prompt";
 import clipboard from "clipboardy";
 import chalk from "chalk";
+import os from "os";
 
-import { messager, trackerLogger } from "../utils/logger.js";
+import { messager } from "../utils/logger.js";
 import { parseJSON, openFileInEditor } from "../utils/helpers.js";
 
 class Tracker {
@@ -58,7 +59,7 @@ class Tracker {
       messager.error("Failed to start child process: PID is undefined.");
       return;
     }
-    fs.writeFileSync(this.trackerPidPath, child.pid.toString());
+    // fs.writeFileSync(this.trackerPidPath, child.pid.toString());
 
     messager.info("Started tracking clipboard in background.");
     child.unref();
@@ -144,6 +145,125 @@ class Tracker {
         }
       }
     );
+  }
+
+  /**
+   * @private
+   * Returns the path to the provided CLI command. Intended for internal use by
+   * the enable method, to embed the correct command in the service file when
+   * enabling on startup. This function supports Windows, although the enable
+   * method that calls it does not.
+   *
+   * @param {string} command - a command line command.
+   * @returns {string|null} - the path the installed command or null.
+   *
+   */
+  private getCommandPath(command: string = "cb"): string | null {
+    try {
+      // Use 'which' on Unix-like systems; 'where' on Windows.
+      const whichCommand = os.platform() === "win32" ? "where" : "which";
+      const commandPath = execSync(`${whichCommand} ${command}`)
+        .toString()
+        .trim()
+        .split("\n")[0]; // Get first result if there are multiple.
+      return commandPath;
+    } catch (err) {
+      messager.error(`Failed to find path for ${command} command.\n${err}`);
+      return null;
+    }
+  }
+
+  /**
+   * Spawns a child process to execute the given command with the specified
+   * arguments.Logs an error message if the process fails to start or exits
+   * with a non-zero code.
+   *
+   * @param {string} command - The command to execute.
+   * @param {string[]} args - An array of arguments to pass to the command.
+   *
+   * @returns {void} This function does not return a value.
+   */
+  private runCommand(command: string, args: string[]): void {
+    const process = spawn(command, args);
+
+    process.on("error", (err) => {
+      messager.error(`Failed to run ${command} ${args.join(" ")}`, err);
+    });
+
+    process.on("exit", (code) => {
+      if (code !== 0) {
+        messager.error(`${command} ${args.join(" ")} exited with code ${code}`);
+      }
+    });
+  }
+
+  /**
+   * The enable subcommand enables the cb clipboard tracker service to be
+   * automatically started on system restart. The service file will be stored
+   * in .config/systemd/user and does not require root privileges. Systemctl is * used to manage the process.
+   */
+  enable() {
+    const cbPath = this.getCommandPath();
+    if (typeof cbPath !== "string") {
+      messager.error("Can't enable tracker: path to 'cb' command not found.");
+      return;
+    }
+    const nodePath = path.dirname(cbPath);
+
+    const serviceContent = `
+    [Unit]
+    Description=CB Clipboard Tracker Service
+
+    [Service]
+    Type=forking
+
+    # Include the node executable used to run 'cb' in the service's path. 
+    Environment="PATH=${nodePath}"
+    ExecStart=/bin/bash -c '${cbPath} tracker start'
+    # PIDFile=${this.args.logsPath}/tracker.pid
+    
+    # Restart if there's a crash
+    Restart=always
+    RestartSec=5
+    StartLimitBurst=5
+    StartLimitIntervalSec=500
+
+    StandardOutput=journal
+    StandardError=journal
+
+    [Install]
+    # Start service when normal system operation is achieved.
+    WantedBy=default.target
+    `;
+
+    const servicePath = path.join(
+      os.homedir(),
+      `.config/systemd/user/cb-clipboard-tracker.service`
+    );
+
+    try {
+      fs.mkdirSync(path.dirname(servicePath), { recursive: true });
+      fs.writeFileSync(servicePath, serviceContent);
+
+      messager.info(`Service file successfully created: ${servicePath}`);
+
+      // Enable and start the user-level service.
+      this.runCommand("systemctl", [
+        "--user",
+        "enable",
+        "cb-clipboard-tracker.service",
+      ]);
+      this.runCommand("systemctl", ["--user", "daemon-reload"]);
+      this.runCommand("systemctl", [
+        "--user",
+        "start",
+        "cb-clipboard-tracker.service",
+      ]);
+
+      messager.info("Clipboard tracker enabled to start on boot.");
+    } catch (err) {
+      messager.error("Failed to create or enable service:", err);
+    }
   }
 }
 
