@@ -1,4 +1,10 @@
-import { spawn, execSync } from "child_process";
+import {
+  exec,
+  spawn,
+  spawnSync,
+  execSync,
+  ChildProcessWithoutNullStreams,
+} from "child_process";
 import fs from "fs";
 import path from "path";
 import prompt from "prompt";
@@ -18,6 +24,7 @@ class Tracker {
   private args: CommonArgs;
   private trackerPidPath: string;
   private trackerPath: string;
+  private serviceName: string;
 
   constructor(args: CommonArgs) {
     this.logsPath = args.logsPath;
@@ -27,43 +34,92 @@ class Tracker {
     this.historyFile = args.historyFile;
     this.args = args;
 
-    // Create directory and file if they don't exist.
-    this.trackerPidPath = path.join(this.logsPath, "tracker.pid");
-    if (!fs.existsSync(this.trackerPidPath)) {
-      fs.mkdirSync(this.logsPath, { recursive: true });
-      fs.writeFileSync(this.trackerPidPath, "");
-    }
+    this.serviceName = "cb-clipboard-tracker.service";
 
     // Path to tracker module.
     this.trackerPath = new URL("../utils/tracker.js", import.meta.url).pathname;
   }
 
-  start() {
-    // Prevent duplicate processes from running.
-    const pid = parseInt(fs.readFileSync(this.trackerPidPath, "utf-8"));
-    if (Number.isInteger(pid)) {
-      messager.info(
-        `Process with id ${pid} is already running. \nTry running \`cb tracker stop\` or \`cb tracker restart\` instead.`
-      );
-      return;
-    }
+  /**
+   * isRunning checks if the tracker service is currently running, using
+   * `systemctl -- user is-active <service-name>`.
+   *
+   * @returns {boolean} whether the service is running
+   */
+  private isRunning(): boolean {
+    const result = spawnSync("systemctl", [
+      "--user",
+      "is-active",
+      this.serviceName,
+    ]);
+    return result.stdout.toString().trim() === "active";
+  }
 
-    // Start a new tracker process.
+  /**
+   * Checks whether a specific process is running by matching the process name or command line.
+   *
+   * @param {string} processName - The name or command line of the process to search for.
+   * @returns {Promise<{ isRunning: boolean; details?: string }>} - A promise that resolves to an object indicating whether the process is running, and includes details if it is.
+   *
+   * @example
+   * const processName = 'node /home/kevin/dev/cb/dist/utils/tracker.js';
+   *
+   * isProcessRunning(processName).then(({ isRunning, details }) => {
+   *   if (isRunning) {
+   *     console.log(`Process is running:\n${details}`);
+   *   } else {
+   *     console.log('Process is not running.');
+   *   }
+   * });
+   */
+  isProcessRunning(
+    processName: string
+  ): Promise<{ isRunning: boolean; details?: string }> {
+    return new Promise((resolve, reject) => {
+      const command = `ps aux | grep "${processName}" | grep -v grep`;
+
+      exec(command, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error executing command: ${error.message}`);
+          return resolve({ isRunning: false });
+        }
+        if (stderr) {
+          console.error(`Error: ${stderr}`);
+          return resolve({ isRunning: false });
+        }
+
+        if (stdout.trim()) {
+          // If there is output, the process is running
+          resolve({ isRunning: true, details: stdout.trim() });
+        } else {
+          // If no output, the process is not running
+          resolve({ isRunning: false });
+        }
+      });
+    });
+  }
+
+  /**
+   * The tracker's start method starts the node process, unless it is already
+   * running.
+   */
+  start() {
+    const processName = "node /home/kevin/dev/cb/dist/utils/tracker.js";
+
+    this.isProcessRunning(processName).then(({ isRunning }) => {
+      if (isRunning) {
+        console.log(`Process is already running.`);
+        return;
+      }
+    });
+
     const child = spawn("node", [this.trackerPath, JSON.stringify(this.args)], {
       detached: true,
       stdio: ["ignore", "inherit", "inherit"],
     });
 
-    // Save process pid to file for easy stopping.
-    if (child.pid === undefined) {
-      messager.error("Failed to start child process: PID is undefined.");
-      return;
-    }
-    // fs.writeFileSync(this.trackerPidPath, child.pid.toString());
-
     messager.info("Started tracking clipboard in background.");
     child.unref();
-    process.exit(0);
   }
 
   stop() {
@@ -181,10 +237,17 @@ class Tracker {
    * @param {string} command - The command to execute.
    * @param {string[]} args - An array of arguments to pass to the command.
    *
-   * @returns {void} This function does not return a value.
+   * @returns {ChildProcessWithoutNullStreams} The spawned process.
    */
-  private runCommand(command: string, args: string[]): void {
+  private runCommand(
+    command: string,
+    args: string[]
+  ): ChildProcessWithoutNullStreams {
     const process = spawn(command, args);
+
+    process.stdout.on("data", (data) => {
+      console.log(data.toString());
+    });
 
     process.on("error", (err) => {
       messager.error(`Failed to run ${command} ${args.join(" ")}`, err);
@@ -195,6 +258,8 @@ class Tracker {
         messager.error(`${command} ${args.join(" ")} exited with code ${code}`);
       }
     });
+
+    return process;
   }
 
   /**
