@@ -37,12 +37,20 @@ function parseYes(str: string) {
   return str && ["yes", "y"].includes(str.toLowerCase());
 }
 
+/**
+ * Filters the entries of an object based on a custom condition provided by the * callback.
+ *
+ * @param {Object.<string, string>} obj - The object to be filtered.
+ * @param {(k: string, v: string) => RegExpMatchArray | null} shouldInclude
+ *   - A function that returns a truthy value if the entry should be included.
+ * @returns {Object.<string, string>} A new, filtered object.
+ */
 export function filterObj(
   obj: { [s: string]: string },
-  onConfirm: (k: string, v: string) => RegExpMatchArray | null
+  shouldInclude: (k: string, v: string) => RegExpMatchArray | null
 ) {
   return Object.fromEntries(
-    Object.entries(obj).filter(([k, v]) => onConfirm(k, v))
+    Object.entries(obj).filter(([k, v]) => shouldInclude(k, v))
   );
 }
 
