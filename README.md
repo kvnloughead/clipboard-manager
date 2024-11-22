@@ -5,7 +5,7 @@ A simple command line key/value focused clipboard manager for Linux, written in 
 ## Installation on Debian/Ubuntu
 
 ```bash
-git clone git clone git@github.com:kvnloughead/clipboard-manager.git
+git clone git@github.com:kvnloughead/clipboard-manager.git cb
 cd cb
 npm install
 sudo apt install xsel
@@ -17,6 +17,19 @@ The setup script will prompt you to enter paths for the files where you want to 
 
 Note that this application uses [clipboardy](https://www.npmjs.com/package/clipboardy), which on Ubuntu/Debian uses `xsel`. Since `xsel` requires an X11 server, if you are connecting to the machine via SSH you will need to use the `-X` flag to enable X11 forwarding.
 
+## Dependencies
+
+### Linux
+`xclip` (for image support)
+```bash
+sudo apt install xclip
+```
+
+### macOS
+`pngpaste` (for image support)
+```bash
+brew install pngpaste
+```
 ## Autocompletion
 
 For autocompletion:

@@ -2,6 +2,7 @@ import fs from "fs";
 import clipboard from "clipboardy";
 import { exec } from "node:child_process";
 import path from "path";
+import { platform } from 'os';
 
 import { parseJSON } from "../utils/helpers.js";
 import { MissingKeyError, NotFoundError } from "../utils/errors.js";
@@ -25,19 +26,19 @@ function get(args: GetArgs, pipe: boolean) {
   } else {
     const file = path.join(imagesPath, key.toString() + ".png");
     if (fs.existsSync(file)) {
-      // TODO - figure out why oh why this kludge is necessary. I can either
-      // get the process to exit, or get it to work. Both at the same time
-      // escapes me. So I log this helpful note instead.
-      messager.info(`Image loaded to clipboard. Hit Ctrl+C to continue.`);
-      exec(
-        `cat ${file} | xclip -selection clipboard -t image/png &`,
-        (error, stdout, stderr) => {
-          if (error || stderr) {
-            messager.error({ error });
-            messager.error({ stderr });
-          }
+      const command = platform() === 'darwin'
+        ? `osascript -e 'set the clipboard to (read (POSIX file "${file}") as «class PNGf»)'`
+        : `cat ${file} | xclip -selection clipboard -t image/png &`;
+
+      messager.info(`Loading image to clipboard...`);
+      exec(command, (error, stdout, stderr) => {
+        if (error || stderr) {
+          messager.error(`Failed to load image to clipboard: ${error?.message || stderr}`);
+          throw new Error(`Failed to load image: ${error?.message || stderr}`);
+        } else {
+          messager.info(`Image loaded successfully`);
         }
-      );
+      });
     } else {
       const fname = "images directory";
       messager.error(MESSAGES.MISSING_KEY(key, fname, false, true));

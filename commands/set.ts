@@ -1,6 +1,7 @@
 import fs from "fs";
 import { exec } from "node:child_process";
 import path from "path";
+import { platform } from 'os';
 
 import { lsImages, promptForConfirmation } from "../utils/helpers.js";
 import { messager } from "../utils/logger.js";
@@ -16,24 +17,28 @@ async function setClip(args: SetArgs) {
     } else {
       const tempPath = path.join(imagesPath, `${key.toString()}_temp.png`);
       const finalPath = path.join(imagesPath, `${key.toString()}.png`);
-      exec(
-        `xclip -selection clipboard -t image/png -o > ${tempPath}`,
-        (error, stdout, stderr) => {
-          if (error || stderr) {
+      
+      const command = platform() === 'darwin'
+        ? `pngpaste ${tempPath}`
+        : `xclip -selection clipboard -t image/png -o > ${tempPath}`;
+
+      exec(command, (error, stdout, stderr) => {
+        if (error || stderr) {
+          if (fs.existsSync(tempPath)) {
             fs.unlinkSync(tempPath); // Delete file if image can't be saved.
-            messager.error(`Failed to save image to key ${key}.`);
-            reject(
-              new Error(
-                `Failed to save image to key ${key}.\n${error}\n${stderr}`
-              )
-            );
-          } else {
-            fs.renameSync(tempPath, finalPath);
-            messager.info(`Image saved successfully`);
-            resolve();
           }
+          messager.error(`Failed to save image to key ${key}.`);
+          reject(
+            new Error(
+              `Failed to save image to key ${key}.\n${error}\n${stderr}`
+            )
+          );
+        } else {
+          fs.renameSync(tempPath, finalPath);
+          messager.info(`Image saved successfully`);
+          resolve();
         }
-      );
+      });
     }
   });
 }
