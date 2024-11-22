@@ -22,5 +22,6 @@
 
 ## Tracker
 
-- [ ] add an `enable` subcommand to allow automatic startup.
+- [x] add an `enable` subcommand to allow automatic startup.
 - [ ] document all subcommands
+- [ ] add macos support

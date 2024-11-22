@@ -10,10 +10,11 @@ cd cb
 npm install
 sudo apt install xsel
 sudo npm install -g .
-node setup.js
-```
+npm run build:prod
+node ./dist/setup.js
+``` 
 
-The setup script will prompt you to enter paths for the files where you want to store your clippings and configuration data. For more information, run `node setup.js --help`.
+The setup script will prompt you to enter paths for the files where you want to store your clippings and configuration data. For more information, run `node ./dist/setup.js --help`.
 
 Note that this application uses [clipboardy](https://www.npmjs.com/package/clipboardy), which on Ubuntu/Debian uses `xsel`. Since `xsel` requires an X11 server, if you are connecting to the machine via SSH you will need to use the `-X` flag to enable X11 forwarding.
 
@@ -57,10 +58,9 @@ On OSX, use `.bash_profile` instead of `.bashrc`.
 
 - aliases for all commands
 
-- A somewhat experimental clipboard tracker is available. Once started the process polls the clipboard every second or so and saves the current contents to a file in an array.
-  - Subcommands include: start, stop, restart, status, open, list.
+- A somewhat experimental clipboard tracker is available (Linux only). Once started the process polls the clipboard every second or so and saves the current contents to a file in an array.
+  - Subcommands include: enable, start, stop, restart, status, open, list.
   - For more details, see [docs/tracker.md](docs/tracker.md).
-  - Note that currently automatic startup isn't enabled. Moreover, before starting the tracker you would have to manually delete the PID stored in `~/.config/cb/logs/tracker.pid`. This will be resolved in a later release.
 
 ## Available subcommands
 
@@ -84,7 +84,7 @@ More detailed usage notes and examples can be found in the [docs](docs) director
 The following scripts are included in package.json.
 
 - `gethelp` - copies the output of `cb --help` to the clipboard, using `xsel`.
-- `tracker:gethelp` - copies the output of `cb tracker --help` to the clipboard, using `xsel`.
+- `tracker:gethelp` - [Linux only] copies the output of `cb tracker --help` to the clipboard, using `xsel`.
 - `build:dev` - builds with `tsc`. The dev build will always mark `dist/bin/index.js` as executable.
 - `build:prod` - builds with `tsc`. The prod build only marks `dist/bind/index.js` as executable if no errors are emitted by `tsc`.
 - `watch` - watches files and rebuilds with `tsc` on change.
