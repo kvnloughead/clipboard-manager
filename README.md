@@ -6,11 +6,12 @@ A simple command line key/value focused clipboard manager for Linux, written in 
 
 ```bash
 git clone git clone git@github.com:kvnloughead/clipboard-manager.git
-cd cb
+cd clipboard-manager
 npm install
 sudo apt install xsel
-sudo npm install -g .
+npm run build:dev && node dist/setup.js
 node setup.js
+npm install -g .
 ```
 
 The setup script will prompt you to enter paths for the files where you want to store your clippings and configuration data. For more information, run `node setup.js --help`.
@@ -46,7 +47,7 @@ On OSX, use `.bash_profile` instead of `.bashrc`.
 
 - A somewhat experimental clipboard tracker is available. Once started the process polls the clipboard every second or so and saves the current contents to a file in an array.
   - Subcommands include: start, stop, restart, status, open, list.
-  - For more details, see [docs/tracker.md](docs/tracker.md).
+  - For more details, run `cb tracker --help`.
   - Note that currently automatic startup isn't enabled. Moreover, before starting the tracker you would have to manually delete the PID stored in `~/.config/cb/logs/tracker.pid`. This will be resolved in a later release.
 
 ## Available subcommands
